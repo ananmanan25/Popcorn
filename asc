@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PopCorn — Stream Everything</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #050508;
+  --surface: #0c0c14;
+  --card: #111120;
+  --card2: #14142a;
+  --border: rgba(255,255,255,0.06);
+  --border2: rgba(255,255,255,0.12);
+  --accent: #f5a623;
+  --accent2: #e8365d;
+  --accent3: #7c3aed;
+  --neon: #00f5ff;
+  --neon2: #a855f7;
+  --text: #f0f0f8;
+  --muted: #6a6a8a;
+  --muted2: #9090b0;
+  --nav-h: 72px;
+  --r: 14px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+
+/* ─── LOADER ─── */
+#loader{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .6s ease,visibility .6s;}
+#loader.hidden{opacity:0;visibility:hidden;pointer-events:none;}
+.loader-logo{font-family:'Bebas Neue',sans-serif;font-size:3.5rem;letter-spacing:4px;background:linear-gradient(135deg,var(--accent),var(--accent2),var(--neon2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:40px;animation:logoPulse 1.5s ease infinite;}
+@keyframes logoPulse{0%,100%{filter:brightness(1);}50%{filter:brightness(1.4);}}
+.loader-bar-wrap{width:280px;height:3px;background:rgba(255,255,255,0.06);border-radius:99px;overflow:hidden;margin-bottom:18px;}
+.loader-bar{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2),var(--neon));border-radius:99px;animation:loadBar 2.4s cubic-bezier(.4,0,.2,1) forwards;}
+@keyframes loadBar{0%{width:0;}60%{width:75%;}90%{width:92%;}100%{width:100%;}}
+.loader-text{color:var(--muted2);font-size:.82rem;letter-spacing:2px;text-transform:uppercase;animation:fadeWords 2.4s ease forwards;}
+@keyframes fadeWords{0%{opacity:0;}20%{opacity:1;}80%{opacity:1;}100%{opacity:0;}}
+.loader-orbs{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
+.loader-orb{position:absolute;border-radius:50%;filter:blur(80px);animation:orbDrift 4s ease-in-out infinite alternate;}
+.loader-orb:nth-child(1){width:400px;height:400px;background:rgba(245,166,35,0.12);top:-100px;left:-100px;animation-delay:0s;}
+.loader-orb:nth-child(2){width:350px;height:350px;background:rgba(232,54,93,0.1);bottom:-80px;right:-80px;animation-delay:.8s;}
+.loader-orb:nth-child(3){width:300px;height:300px;background:rgba(124,58,237,0.1);top:50%;left:50%;transform:translate(-50%,-50%);animation-delay:.4s;}
+@keyframes orbDrift{0%{transform:scale(1) translate(0,0);}100%{transform:scale(1.2) translate(20px,-20px);}}
+
+/* ─── NAV ─── */
+nav{position:fixed;top:0;left:0;right:0;height:var(--nav-h);z-index:100;display:flex;align-items:center;padding:0 32px;gap:0;
+  background:rgba(5,5,8,0.85);border-bottom:1px solid var(--border);backdrop-filter:blur(20px) saturate(180%);}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:1.9rem;letter-spacing:3px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  margin-right:32px;flex-shrink:0;}
+.nav-main{display:flex;align-items:center;gap:2px;flex:1;}
+.nav-item{position:relative;}
+.nav-btn{background:none;border:none;color:var(--muted2);font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:500;
+  padding:8px 14px;border-radius:10px;cursor:pointer;transition:all .2s;white-space:nowrap;display:flex;align-items:center;gap:5px;}
+.nav-btn svg{width:12px;height:12px;transition:transform .2s;}
+.nav-btn:hover,.nav-btn.active{color:var(--text);background:rgba(255,255,255,0.06);}
+.nav-btn.active::after{content:'';position:absolute;bottom:-1px;left:50%;transform:translateX(-50%);width:20px;height:2px;background:var(--accent);border-radius:2px;}
+
+/* MEGA DROPDOWN */
+.nav-dropdown{position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);
+  background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:16px;
+  min-width:480px;opacity:0;visibility:hidden;transition:all .2s;pointer-events:none;
+  box-shadow:0 24px 60px rgba(0,0,0,0.7);}
+.nav-item:hover .nav-dropdown{opacity:1;visibility:visible;pointer-events:all;transform:translateX(-50%) translateY(0);}
+.dropdown-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.dd-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:.2s;border:1px solid transparent;}
+.dd-item:hover{background:rgba(255,255,255,0.05);border-color:var(--border2);}
+.dd-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;}
+.dd-label{font-size:.82rem;font-weight:500;color:var(--text);}
+.dd-sub{font-size:.72rem;color:var(--muted);margin-top:1px;}
+
+/* NAV RIGHT */
+.nav-right{display:flex;align-items:center;gap:10px;margin-left:auto;}
+.search-wrap{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.04);border:1px solid var(--border);
+  border-radius:10px;padding:7px 14px;transition:.2s;cursor:text;}
+.search-wrap:focus-within{border-color:rgba(245,166,35,0.4);background:rgba(245,166,35,0.04);}
+.search-wrap input{background:none;border:none;outline:none;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.87rem;width:170px;}
+.search-wrap input::placeholder{color:var(--muted);}
+.nav-icon-btn{background:rgba(255,255,255,0.05);border:1px solid var(--border);color:var(--muted2);
+  width:36px;height:36px;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;position:relative;}
+.nav-icon-btn:hover{color:var(--text);border-color:var(--border2);}
+.notif-dot{position:absolute;top:7px;right:7px;width:7px;height:7px;background:var(--accent2);border-radius:50%;border:2px solid var(--surface);}
+.admin-btn{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000;font-weight:700;
+  border:none;border-radius:10px;padding:8px 18px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.83rem;transition:.2s;text-decoration:none;}
+.admin-btn:hover{opacity:.88;transform:translateY(-1px);}
+
+/* ─── HERO ─── */
+.hero{height:95vh;min-height:600px;position:relative;overflow:hidden;margin-top:var(--nav-h);display:flex;align-items:flex-end;}
+.hero-slides{position:absolute;inset:0;}
+.hero-slide{position:absolute;inset:0;opacity:0;transition:opacity 1.2s ease;display:flex;align-items:flex-end;}
+.hero-slide.active{opacity:1;}
+.slide-bg{position:absolute;inset:0;background-size:cover;background-position:center;transform:scale(1.05);transition:transform 8s ease;}
+.hero-slide.active .slide-bg{transform:scale(1);}
+.slide-gradient{position:absolute;inset:0;background:linear-gradient(135deg,rgba(5,5,8,0.95) 0%,rgba(5,5,8,0.5) 50%,rgba(5,5,8,0.8) 100%);}
+.slide-bottom{position:absolute;bottom:0;left:0;right:0;height:50%;background:linear-gradient(to top,var(--bg) 0%,transparent 100%);}
+
+/* Animated grid overlay */
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(0,245,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,245,255,0.03) 1px,transparent 1px);background-size:60px 60px;animation:gridPan 20s linear infinite;}
+@keyframes gridPan{0%{background-position:0 0;}100%{background-position:60px 60px;}}
+
+.slide-content{position:relative;z-index:5;padding:0 60px 90px;max-width:660px;}
+.slide-eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(245,166,35,0.12);border:1px solid rgba(245,166,35,0.25);
+  border-radius:20px;padding:5px 14px;font-size:.76rem;font-weight:600;color:var(--accent);letter-spacing:.8px;text-transform:uppercase;margin-bottom:18px;}
+.slide-eyebrow span{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:blink 1.4s ease infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+.slide-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(3rem,8vw,6.5rem);line-height:.95;letter-spacing:1px;margin-bottom:18px;}
+.slide-title .glow{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 30px rgba(245,166,35,0.35));}
+.slide-desc{color:var(--muted2);font-size:1rem;line-height:1.7;max-width:480px;margin-bottom:28px;}
+.slide-meta{display:flex;align-items:center;gap:16px;margin-bottom:32px;}
+.slide-tag{background:rgba(255,255,255,0.08);border:1px solid var(--border2);border-radius:6px;padding:4px 12px;font-size:.78rem;font-weight:500;color:var(--text);}
+.slide-rating{display:flex;align-items:center;gap:5px;font-size:.85rem;color:var(--accent);font-weight:600;}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap;}
+.btn-play{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000;font-weight:700;border:none;
+  border-radius:12px;padding:14px 30px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.97rem;transition:.25s;
+  box-shadow:0 8px 32px rgba(245,166,35,0.35);}
+.btn-play:hover{transform:translateY(-3px);box-shadow:0 16px 48px rgba(245,166,35,0.5);}
+.btn-ghost{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.06);color:var(--text);
+  font-weight:600;border:1px solid var(--border2);border-radius:12px;padding:14px 28px;cursor:pointer;
+  font-family:'DM Sans',sans-serif;font-size:.97rem;transition:.25s;backdrop-filter:blur(10px);}
+.btn-ghost:hover{background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.2);}
+
+/* SLIDE INDICATORS */
+.hero-nav{position:absolute;bottom:36px;right:60px;z-index:10;display:flex;align-items:center;gap:10px;}
+.hero-dot{width:28px;height:3px;background:rgba(255,255,255,0.2);border-radius:99px;cursor:pointer;transition:.4s;}
+.hero-dot.active{width:48px;background:var(--accent);}
+.hero-arrows{position:absolute;right:60px;top:50%;transform:translateY(-50%);z-index:10;display:flex;flex-direction:column;gap:10px;}
+.hero-arr{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.06);border:1px solid var(--border2);color:var(--text);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;backdrop-filter:blur(10px);}
+.hero-arr:hover{background:rgba(255,255,255,0.12);}
+
+/* HERO SCROLL BADGE */
+.scroll-hint{position:absolute;bottom:36px;left:60px;z-index:10;display:flex;align-items:center;gap:10px;color:var(--muted);font-size:.78rem;animation:float2 3s ease-in-out infinite;}
+@keyframes float2{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+.scroll-wheel{width:22px;height:36px;border:1px solid rgba(255,255,255,0.2);border-radius:99px;display:flex;align-items:flex-start;justify-content:center;padding-top:6px;}
+.scroll-wheel::after{content:'';width:4px;height:8px;background:var(--muted);border-radius:99px;animation:wheel 1.8s ease infinite;}
+@keyframes wheel{0%{transform:translateY(0);opacity:1;}100%{transform:translateY(10px);opacity:0;}}
+
+/* ─── CATEGORY FILTER ─── */
+.cat-section{padding:24px 40px 8px;display:flex;align-items:center;gap:12px;overflow-x:auto;scrollbar-width:none;}
+.cat-section::-webkit-scrollbar{display:none;}
+.cat-pill{flex-shrink:0;background:var(--card);border:1px solid var(--border);border-radius:99px;
+  padding:8px 20px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.84rem;font-weight:500;color:var(--muted2);
+  transition:.22s;white-space:nowrap;display:flex;align-items:center;gap:6px;}
+.cat-pill:hover{color:var(--text);border-color:var(--border2);background:rgba(255,255,255,0.05);}
+.cat-pill.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000;border-color:transparent;font-weight:700;}
+.cat-pill .dot{width:7px;height:7px;border-radius:50%;}
+
+/* ─── SECTIONS ─── */
+.section{padding:16px 40px 36px;}
+.sec-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.sec-title{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:1px;display:flex;align-items:center;gap:10px;}
+.sec-title .accent{color:var(--accent);}
+.sec-line{flex:1;height:1px;background:linear-gradient(90deg,var(--border2),transparent);margin-left:14px;}
+.see-all-btn{background:none;border:1px solid var(--border);color:var(--muted2);border-radius:8px;
+  padding:6px 14px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem;transition:.2s;display:flex;align-items:center;gap:5px;}
+.see-all-btn:hover{color:var(--text);border-color:var(--border2);}
+
+/* ─── FEATURED STRIP ─── */
+.featured-strip{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px;}
+.feat-card{position:relative;border-radius:18px;overflow:hidden;aspect-ratio:16/9;cursor:pointer;
+  border:1px solid var(--border);transition:.3s;group:feat;}
+.feat-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(245,166,35,0.0),rgba(232,54,93,0.0));transition:.4s;z-index:2;}
+.feat-card:hover::before{background:linear-gradient(135deg,rgba(245,166,35,0.08),rgba(232,54,93,0.08));}
+.feat-card:hover{transform:translateY(-5px) scale(1.01);border-color:rgba(245,166,35,0.35);box-shadow:0 24px 70px rgba(0,0,0,.7);}
+.feat-img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s;}
+.feat-card:hover .feat-img{transform:scale(1.05);}
+.feat-ph{width:100%;height:100%;background:linear-gradient(135deg,#0f0f25,#1a0f35,#0f1a35);}
+.feat-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(5,5,8,.98) 0%,rgba(5,5,8,.3) 55%,transparent 100%);
+  display:flex;flex-direction:column;justify-content:flex-end;padding:22px;z-index:3;transition:.3s;}
+.feat-card:hover .feat-overlay{background:linear-gradient(to top,rgba(5,5,8,1) 0%,rgba(5,5,8,.5) 65%,transparent 100%);}
+.feat-cat{font-size:.72rem;font-weight:700;color:var(--accent);letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px;}
+.feat-name{font-family:'Bebas Neue',sans-serif;font-size:1.7rem;letter-spacing:.5px;line-height:1.05;margin-bottom:8px;}
+.feat-row{display:flex;align-items:center;gap:10px;color:var(--muted2);font-size:.78rem;}
+.feat-play-btn{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;margin-left:auto;transform:scale(0);opacity:0;transition:.3s;}
+.feat-card:hover .feat-play-btn{transform:scale(1);opacity:1;}
+
+/* ─── CARD GRID ─── */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:16px;}
+.v-card{background:var(--card);border-radius:14px;overflow:hidden;cursor:pointer;border:1px solid var(--border);transition:.3s;position:relative;}
+.v-card:hover{transform:translateY(-7px) scale(1.015);border-color:rgba(245,166,35,0.35);box-shadow:0 24px 60px rgba(0,0,0,.65);}
+.v-thumb{width:100%;aspect-ratio:16/10;position:relative;overflow:hidden;background:linear-gradient(135deg,#0f0f25,#1a1a35);}
+.v-thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s;}
+.v-card:hover .v-thumb img{transform:scale(1.08);}
+.v-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;}
+.v-hover-layer{position:absolute;inset:0;background:rgba(0,0,0,0);display:flex;align-items:center;justify-content:center;
+  opacity:0;transition:.3s;}
+.v-card:hover .v-hover-layer{background:rgba(0,0,0,0.45);opacity:1;}
+.v-play-ring{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;transform:scale(.7);transition:.3s;box-shadow:0 0 40px rgba(245,166,35,.5);}
+.v-card:hover .v-play-ring{transform:scale(1);}
+.new-tag{position:absolute;top:10px;left:10px;background:var(--accent2);color:#fff;font-size:.66rem;font-weight:700;
+  letter-spacing:.5px;text-transform:uppercase;border-radius:5px;padding:3px 8px;}
+.v-body{padding:12px 14px 14px;}
+.v-genre{font-size:.7rem;font-weight:700;color:var(--accent);letter-spacing:.6px;text-transform:uppercase;margin-bottom:4px;}
+.v-title{font-weight:600;font-size:.92rem;line-height:1.35;margin-bottom:7px;color:var(--text);}
+.v-meta{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:.75rem;flex-wrap:wrap;}
+.v-dur{display:flex;align-items:center;gap:3px;}
+.v-dot{width:3px;height:3px;background:var(--muted);border-radius:50%;}
+.progress-bar{height:2px;background:rgba(255,255,255,0.08);border-radius:99px;margin-top:8px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:99px;}
+
+/* ─── HORIZONTAL SCROLL ROW ─── */
+.h-scroll-wrap{position:relative;}
+.h-scroll{display:flex;gap:14px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;}
+.h-scroll::-webkit-scrollbar{display:none;}
+.h-scroll .v-card{min-width:190px;flex-shrink:0;}
+
+/* ─── LARGE HERO CARD (continue watching) ─── */
+.cw-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;}
+.cw-card{background:var(--card);border-radius:16px;overflow:hidden;cursor:pointer;border:1px solid var(--border);transition:.3s;display:flex;gap:0;flex-direction:column;}
+.cw-card:hover{border-color:rgba(245,166,35,0.3);transform:translateY(-4px);box-shadow:0 20px 50px rgba(0,0,0,.6);}
+.cw-thumb{width:100%;aspect-ratio:16/9;position:relative;overflow:hidden;background:linear-gradient(135deg,#0f0f25,#1a1a35);}
+.cw-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+.cw-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;opacity:0;transition:.3s;}
+.cw-card:hover .cw-overlay{opacity:1;}
+.cw-big-play{width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;}
+.cw-body{padding:14px 16px;}
+.cw-title{font-weight:600;font-size:.95rem;margin-bottom:4px;}
+.cw-sub{font-size:.78rem;color:var(--muted2);margin-bottom:10px;}
+.progress-bar{height:3px;background:rgba(255,255,255,0.08);border-radius:99px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));}
+
+/* ─── MODAL ─── */
+.modal-wrap{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:500;display:none;align-items:center;justify-content:center;
+  padding:20px;backdrop-filter:blur(12px);}
+.modal-wrap.open{display:flex;animation:fadeIn .2s ease;}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:22px;width:100%;max-width:900px;
+  overflow:hidden;animation:modalIn .3s cubic-bezier(.2,0,0,1.1);}
+@keyframes modalIn{from{transform:scale(.93) translateY(30px);opacity:0;}to{transform:scale(1) translateY(0);opacity:1;}}
+.modal-vid{width:100%;aspect-ratio:16/9;background:#000;}
+.modal-vid video{width:100%;height:100%;display:block;}
+.modal-body{padding:28px 32px;}
+.modal-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:10px;}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;letter-spacing:1px;line-height:1;}
+.modal-x{background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--text);width:36px;height:36px;
+  border-radius:9px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:.2s;flex-shrink:0;}
+.modal-x:hover{background:rgba(255,255,255,0.12);}
+.modal-tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.modal-tag{background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:6px;padding:4px 12px;font-size:.78rem;color:var(--muted2);}
+.modal-desc{color:var(--muted2);font-size:.95rem;line-height:1.75;}
+.modal-actions{display:flex;gap:10px;margin-top:20px;}
+.modal-btn-play{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#000;font-weight:700;border:none;border-radius:11px;padding:13px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.95rem;transition:.2s;}
+.modal-btn-play:hover{opacity:.9;transform:translateY(-1px);}
+.modal-btn-list{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.06);color:var(--text);
+  border:1px solid var(--border2);border-radius:11px;padding:13px 20px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.95rem;font-weight:600;transition:.2s;}
+.modal-btn-list:hover{background:rgba(255,255,255,0.1);}
+
+/* ─── EMPTY ─── */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:100px 20px;color:var(--muted);text-align:center;gap:12px;}
+.empty p{font-size:1.1rem;color:var(--text2);}
+.empty small{font-size:.85rem;}
+
+/* ─── SKELETONS ─── */
+.skel-card{background:var(--card);border-radius:14px;overflow:hidden;border:1px solid var(--border);}
+.skel-thumb{width:100%;aspect-ratio:16/10;background:linear-gradient(90deg,#111120 25%,#1a1a30 50%,#111120 75%);background-size:200% 100%;animation:shimmer 1.6s ease infinite;}
+@keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+.skel-line{height:12px;border-radius:6px;margin:12px 14px 5px;background:#1a1a30;}
+.skel-line.short{width:55%;margin-top:4px;}
+
+/* ─── FOOTER ─── */
+footer{padding:50px 40px;border-top:1px solid var(--border);margin-top:30px;}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;margin-bottom:40px;}
+.footer-logo{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:3px;background:linear-gradient(135deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:12px;}
+.footer-desc{color:var(--muted);font-size:.85rem;line-height:1.7;max-width:280px;}
+.footer-head{font-weight:600;font-size:.87rem;color:var(--text);margin-bottom:14px;letter-spacing:.3px;}
+.footer-links{display:flex;flex-direction:column;gap:10px;}
+.footer-links a{color:var(--muted);font-size:.83rem;text-decoration:none;transition:.2s;}
+.footer-links a:hover{color:var(--text);}
+.footer-bottom{display:flex;align-items:center;justify-content:space-between;padding-top:24px;border-top:1px solid var(--border);color:var(--muted);font-size:.8rem;}
+.footer-badges{display:flex;gap:10px;}
+.f-badge{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:6px;padding:4px 12px;font-size:.75rem;color:var(--muted2);}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:900px){
+  .footer-grid{grid-template-columns:1fr 1fr;}
+  .nav-main{display:none;}
+  .hero-arrows{display:none;}
+}
+@media(max-width:640px){
+  nav{padding:0 16px;gap:10px;}
+  .hero{padding-bottom:0;}
+  .slide-content{padding:0 20px 80px;}
+  .section{padding:12px 16px 28px;}
+  .cat-section{padding:16px 16px 4px;}
+  .cards-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;}
+  .search-wrap input{width:110px;}
+  .footer-grid{grid-template-columns:1fr;}
+  .scroll-hint{left:20px;}
+  .hero-nav{right:20px;}
+}
+</style>
+</head>
+<body>
+<script type="module" src="https://unpkg.com/@splinetool/viewer@1.12.81/build/spline-viewer.js"></script>
+<spline-viewer url="https://prod.spline.design/F9rxJdU3sQ1OnPWF/scene.splinecode"></spline-viewer>
+<!-- ─── LOADER ─── -->
+<div id="loader">
+  <div class="loader-orbs">
+    <div class="loader-orb"></div>
+    <div class="loader-orb"></div>
+    <div class="loader-orb"></div>
+  </div>
+  <div class="loader-logo">🍿 POPCORN</div>
+  <div class="loader-bar-wrap"><div class="loader-bar"></div></div>
+  <div class="loader-text" id="loaderText">Curating your experience...</div>
+</div>
+
+<!-- ─── NAV ─── -->
+<nav>
+  <div class="logo">🍿 POPCORN</div>
+  <div class="nav-main">
+    <div class="nav-item">
+      <button class="nav-btn active" onclick="filterCategory('all',this)">Home</button>
+    </div>
+    <div class="nav-item">
+      <button class="nav-btn">Movies <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6,9 12,15 18,9"/></svg></button>
+      <div class="nav-dropdown">
+        <div class="dropdown-grid">
+          <div class="dd-item" onclick="filterCategory('Action')"><div class="dd-icon" style="background:rgba(232,54,93,0.15)">⚡</div><div><div class="dd-label">Action</div><div class="dd-sub">High octane films</div></div></div>
+          <div class="dd-item" onclick="filterCategory('Thriller')"><div class="dd-icon" style="background:rgba(124,58,237,0.15)">🔪</div><div><div class="dd-label">Thriller</div><div class="dd-sub">Edge of your seat</div></div></div>
+          <div class="dd-item" onclick="filterCategory('Horror')"><div class="dd-icon" style="background:rgba(0,245,255,0.1)">👻</div><div><div class="dd-label">Horror</div><div class="dd-sub">Fear the unknown</div></div></div>
+          <div class="dd-item" onclick="filterCategory('Drama')"><div class="dd-icon" style="background:rgba(245,166,35,0.15)">🎭</div><div><div class="dd-label">Drama</div><div class="dd-sub">Emotional stories</div></div></div>
+          <div class="dd-item" onclick="filterCategory('Romance')"><div class="dd-icon" style="background:rgba(232,54,93,0.12)">❤️</div><div><div class="dd-label">Romance</div><div class="dd-sub">Love stories</div></div></div>
+          <div class="dd-item" onclick="filterCategory('Comedy')"><div class="dd-icon" style="background:rgba(245,166,35,0.12)">😂</div><div><div class="dd-label">Comedy</div><div class="dd-sub">Laugh out loud</div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item">
+      <button class="nav-btn">Genres <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6,9 12,15 18,9"/></svg></button>
+      <div class="nav-dropdown">
+        <div class="dropdown-grid">
+          <div class="dd-item" onclick="filterCategory('Animation')"><div class="dd-icon" style="background:rgba(0,245,255,0.1)">🎨</div><div><div class="dd-label">Animation</div><div class="dd-sub">Animated worlds</div></div></div>
+          <div class="dd-item" onclick="filterCategory('Documentary')"><div class="dd-icon" style="background:rgba(245,166,35,0.12)">📹</div><div><div class="dd-label">Documentary</div><div class="dd-sub">Real stories</div></div></div>
+          <div class="dd-item" onclick="filterCategory('Sci-Fi')"><div class="dd-icon" style="background:rgba(124,58,237,0.15)">🚀</div><div><div class="dd-label">Sci-Fi</div><div class="dd-sub">Future worlds</div></div></div>
+          <div class="dd-item" onclick="filterCategory('Fantasy')"><div class="dd-icon" style="background:rgba(168,85,247,0.15)">🧙</div><div><div class="dd-label">Fantasy</div><div class="dd-sub">Magical realms</div></div></div>
+          <div class="dd-item" onclick="filterCategory('Mystery')"><div class="dd-icon" style="background:rgba(0,245,255,0.08)">🔍</div><div><div class="dd-label">Mystery</div><div class="dd-sub">Unravel the truth</div></div></div>
+          <div class="dd-item" onclick="filterCategory('Adventure')"><div class="dd-icon" style="background:rgba(245,166,35,0.12)">🗺️</div><div><div class="dd-label">Adventure</div><div class="dd-sub">Epic journeys</div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item">
+      <button class="nav-btn">New & Hot <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6,9 12,15 18,9"/></svg></button>
+      <div class="nav-dropdown" style="min-width:300px;">
+        <div class="dropdown-grid" style="grid-template-columns:1fr 1fr;">
+          <div class="dd-item"><div class="dd-icon" style="background:rgba(232,54,93,0.15)">🔥</div><div><div class="dd-label">Trending</div><div class="dd-sub">Hot right now</div></div></div>
+          <div class="dd-item"><div class="dd-icon" style="background:rgba(245,166,35,0.12)">✨</div><div><div class="dd-label">New Releases</div><div class="dd-sub">Just added</div></div></div>
+          <div class="dd-item"><div class="dd-icon" style="background:rgba(124,58,237,0.15)">⭐</div><div><div class="dd-label">Top Rated</div><div class="dd-sub">Community picks</div></div></div>
+          <div class="dd-item"><div class="dd-icon" style="background:rgba(0,245,255,0.1)">🎬</div><div><div class="dd-label">Indie Films</div><div class="dd-sub">Hidden gems</div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item">
+      <button class="nav-btn" onclick="filterCategory('all',this)">My List</button>
+    </div>
+  </div>
+  <div class="nav-right">
+    <div class="search-wrap">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" placeholder="Search titles..." id="searchInput" oninput="handleSearch()"/>
+    </div>
+    <button class="nav-icon-btn" title="Notifications">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <div class="notif-dot"></div>
+    </button>
+  </div>
+</nav>
+
+<!-- ─── HERO ─── -->
+<div class="hero">
+  <div class="hero-slides" id="heroSlides"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-arrows">
+    <button class="hero-arr" onclick="prevSlide()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18,15 12,9 6,15"/></svg></button>
+    <button class="hero-arr" onclick="nextSlide()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6,9 12,15 18,9"/></svg></button>
+  </div>
+  <div class="scroll-hint">
+    <div class="scroll-wheel"></div>
+    <span>Scroll to explore</span>
+  </div>
+  <div class="hero-nav" id="heroNav"></div>
+</div>
+
+<!-- ─── CATEGORY PILLS ─── -->
+<div class="cat-section" id="catSection">
+  <div class="cat-pill active" onclick="filterCategory('all',this)"><span>🎬</span> All Titles</div>
+  <div class="cat-pill" onclick="filterCategory('Action',this)"><span>⚡</span> Action</div>
+  <div class="cat-pill" onclick="filterCategory('Comedy',this)"><span>😂</span> Comedy</div>
+  <div class="cat-pill" onclick="filterCategory('Drama',this)"><span>🎭</span> Drama</div>
+  <div class="cat-pill" onclick="filterCategory('Horror',this)"><span>👻</span> Horror</div>
+  <div class="cat-pill" onclick="filterCategory('Documentary',this)"><span>📹</span> Docs</div>
+  <div class="cat-pill" onclick="filterCategory('Romance',this)"><span>❤️</span> Romance</div>
+  <div class="cat-pill" onclick="filterCategory('Thriller',this)"><span>🔪</span> Thriller</div>
+  <div class="cat-pill" onclick="filterCategory('Animation',this)"><span>🎨</span> Animation</div>
+  <div class="cat-pill" onclick="filterCategory('Sci-Fi',this)"><span>🚀</span> Sci-Fi</div>
+  <div class="cat-pill" onclick="filterCategory('Fantasy',this)"><span>🧙</span> Fantasy</div>
+</div>
+
+<!-- ─── MAIN CONTENT ─── -->
+<div id="mainContent"></div>
+
+<!-- ─── MODAL ─── -->
+<div class="modal-wrap" id="modalWrap" onclick="closeModal(event)">
+  <div class="modal" id="modalBox">
+    <div class="modal-vid"><video id="modalVideo" controls playsinline></video></div>
+    <div class="modal-body">
+      <div class="modal-top">
+        <div class="modal-title" id="modalTitle"></div>
+        <button class="modal-x" onclick="closeModalBtn()">✕</button>
+      </div>
+      <div class="modal-tags" id="modalTags"></div>
+      <div class="modal-desc" id="modalDesc"></div>
+      <div class="modal-actions">
+        <button class="modal-btn-play" onclick="document.getElementById('modalVideo').play()">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+          Play Now
+        </button>
+        <button class="modal-btn-list">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          My List
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── FOOTER ─── -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <div class="footer-logo">🍿 POPCORN</div>
+      <p class="footer-desc">Stream short films, indie gems, and curated content. All in one place. No ads, no interruptions, just pure cinema.</p>
+    </div>
+    <div>
+      <div class="footer-head">Browse</div>
+      <div class="footer-links">
+        <a href="#">New Releases</a>
+        <a href="#">Trending Now</a>
+        <a href="#">Top Rated</a>
+        <a href="#">My List</a>
+      </div>
+    </div>
+    <div>
+      <div class="footer-head">Genres</div>
+      <div class="footer-links">
+        <a href="#">Action</a>
+        <a href="#">Drama</a>
+        <a href="#">Comedy</a>
+        <a href="#">Horror</a>
+        <a href="#">Documentary</a>
+      </div>
+    </div>
+    <div>
+      <div class="footer-head">Support</div>
+      <div class="footer-links">
+        <a href="#">Help Center</a>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Use</a>
+        <a href="#">Contact Us</a>
+        <a href="admin.html">Admin Panel</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 PopCorn. Built with Firebase & Cloudinary.</span>
+    <div class="footer-badges">
+      <span class="f-badge">4K Ultra HD</span>
+      <span class="f-badge">No Ads</span>
+      <span class="f-badge">Indie First</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ─── FIREBASE + APP ─── -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyABdKh8LYCGNkpuJ_OvW4ciYd0OLoe8DBw",
+  authDomain: "pop-corn-c4918.firebaseapp.com",
+  projectId: "pop-corn-c4918",
+  storageBucket: "pop-corn-c4918.firebasestorage.app",
+  messagingSenderId: "721578587416",
+  appId: "1:721578587416:web:47f27eb996b78730675a6d",
+  measurementId: "G-34CS0S1T7Y"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+let allVideos = [];
+let currentCategory = 'all';
+let searchQuery = '';
+let heroIdx = 0;
+let heroTimer;
+
+// ── LOADER ──
+const loadingTexts = ['Curating your experience...','Fetching indie gems...','Loading the magic...','Almost there...'];
+let ltIdx = 0;
+const ltEl = document.getElementById('loaderText');
+const ltInterval = setInterval(() => { ltIdx = (ltIdx+1)%loadingTexts.length; ltEl.textContent = loadingTexts[ltIdx]; }, 800);
+
+function hideLoader() {
+  clearInterval(ltInterval);
+  setTimeout(() => document.getElementById('loader').classList.add('hidden'), 300);
+}
+
+// ── HERO SLIDES ──
+const heroSlideData = [
+  { eyebrow:'🔥 Trending Now', title:'YOUR NEXT', accent:'OBSESSION', sub:'Awaits.', desc:'Stream short films, indie gems, and curated content — all in one place. No ads, no interruptions.', tags:['Free to Watch','4K HDR','No Ads'], bg:'linear-gradient(135deg,#0a0010 0%,#200030 50%,#0a1020 100%)' },
+  { eyebrow:'✨ New Release', title:'DISCOVER THE', accent:'UNSEEN', sub:'World.', desc:'A curated selection of hidden masterpieces waiting for their audience. Handpicked indie cinema at its finest.', tags:['Indie Films','Award Winning'], bg:'linear-gradient(135deg,#001020 0%,#002030 50%,#000818 100%)' },
+  { eyebrow:'🎬 Editor\'s Pick', title:'FEEL EVERY', accent:'EMOTION', sub:'Live.', desc:'Drama, romance, and everything in between. Stories that stay with you long after the credits roll.', tags:['Drama','International'], bg:'linear-gradient(135deg,#100010 0%,#200015 50%,#080018 100%)' },
+];
+
+function buildHero(videos) {
+  const slides = heroSlideData;
+  const container = document.getElementById('heroSlides');
+  const navEl = document.getElementById('heroNav');
+  container.innerHTML = '';
+  navEl.innerHTML = '';
+
+  slides.forEach((s, i) => {
+    const vid = videos[i];
+    const div = document.createElement('div');
+    div.className = 'hero-slide' + (i === 0 ? ' active' : '');
+    div.innerHTML = `
+      <div class="slide-bg" style="background:${s.bg};${vid?.thumbnailUrl ? `background-image:url(${vid.thumbnailUrl});background-size:cover;background-position:center;` : ''}"></div>
+      <div class="slide-gradient"></div>
+      <div class="slide-bottom"></div>
+      <div class="slide-content">
+        <div class="slide-eyebrow"><span></span>${s.eyebrow}</div>
+        <div class="slide-title">${s.title}<br/><span class="glow">${s.accent}</span><br/>${s.sub}</div>
+        <p class="slide-desc">${vid ? vid.description || s.desc : s.desc}</p>
+        <div class="slide-meta">
+          ${s.tags.map(t => `<span class="slide-tag">${t}</span>`).join('')}
+          <div class="slide-rating">★ 9.${Math.floor(Math.random()*3)+1}</div>
+        </div>
+        <div class="hero-actions">
+          <button class="btn-play" onclick="${vid ? `openModal('${vid.id}')` : 'document.querySelector(\".section\")?.scrollIntoView({behavior:\"smooth\"})'}" >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+            ${vid ? 'Watch Now' : 'Browse Now'}
+          </button>
+          <button class="btn-ghost" onclick="document.querySelector('.section')?.scrollIntoView({behavior:'smooth'})">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Explore More
+          </button>
+        </div>
+      </div>`;
+    container.appendChild(div);
+
+    const dot = document.createElement('div');
+    dot.className = 'hero-dot' + (i === 0 ? ' active' : '');
+    dot.onclick = () => goSlide(i);
+    navEl.appendChild(dot);
+  });
+  startHeroTimer();
+}
+
+function goSlide(idx) {
+  const slides = document.querySelectorAll('.hero-slide');
+  const dots = document.querySelectorAll('.hero-dot');
+  if (!slides.length) return;
+  slides[heroIdx]?.classList.remove('active');
+  dots[heroIdx]?.classList.remove('active');
+  heroIdx = (idx + slides.length) % slides.length;
+  slides[heroIdx]?.classList.add('active');
+  dots[heroIdx]?.classList.add('active');
+}
+window.nextSlide = () => { clearTimeout(heroTimer); goSlide(heroIdx + 1); startHeroTimer(); };
+window.prevSlide = () => { clearTimeout(heroTimer); goSlide(heroIdx - 1); startHeroTimer(); };
+function startHeroTimer() { heroTimer = setTimeout(() => { goSlide(heroIdx + 1); startHeroTimer(); }, 6000); }
+
+// ── LOAD ──
+async function loadVideos() {
+  showSkeletons();
+  try {
+    const q = query(collection(db, 'videos'), orderBy('createdAt', 'desc'));
+    const snap = await getDocs(q);
+    allVideos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch(e) { console.error(e); }
+  buildHero(allVideos);
+  renderContent();
+  hideLoader();
+}
+
+function showSkeletons() {
+  const c = document.getElementById('mainContent');
+  const row = Array(6).fill(`<div class="skel-card"><div class="skel-thumb"></div><div class="skel-line"></div><div class="skel-line short"></div></div>`).join('');
+  c.innerHTML = `<div class="section"><div class="sec-header"><div class="sec-title">Loading<div class="sec-line"></div></div></div><div class="cards-grid">${row}</div></div>`;
+}
+
+window.filterCategory = function(cat, el) {
+  currentCategory = cat;
+  document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+  if (el) el.classList.add('active');
+  renderContent();
+};
+
+window.handleSearch = function() {
+  searchQuery = document.getElementById('searchInput').value.toLowerCase();
+  renderContent();
+};
+
+function getFiltered() {
+  return allVideos.filter(v => {
+    const mc = currentCategory === 'all' || v.category === currentCategory;
+    const ms = !searchQuery || v.title?.toLowerCase().includes(searchQuery) || v.description?.toLowerCase().includes(searchQuery);
+    return mc && ms;
+  });
+}
+
+const catIcons = {Action:'⚡',Comedy:'😂',Drama:'🎭',Horror:'👻',Documentary:'📹',Romance:'❤️',Thriller:'🔪',Animation:'🎨','Sci-Fi':'🚀',Fantasy:'🧙',Mystery:'🔍',Adventure:'🗺️',Uncategorized:'🎬'};
+
+function renderContent() {
+  const filtered = getFiltered();
+  const c = document.getElementById('mainContent');
+
+  if (!filtered.length) {
+    c.innerHTML = `<div class="empty">
+      <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <p>No titles found</p>
+      <small>${currentCategory !== 'all' ? 'Try a different genre or ' : ''}add content via the Admin panel.</small>
+    </div>`;
+    return;
+  }
+
+  if (currentCategory === 'all' && !searchQuery) {
+    const groups = {};
+    filtered.forEach(v => { const cat = v.category || 'Uncategorized'; if (!groups[cat]) groups[cat] = []; groups[cat].push(v); });
+
+    let html = `<div class="section" id="content-top">
+      <div class="sec-header">
+        <div class="sec-title">🔥 <span class="accent">Featured</span> Now<div class="sec-line"></div></div>
+      </div>
+      <div class="featured-strip">${filtered.slice(0,3).map(featCard).join('')}</div>
+    </div>`;
+
+    html += `<div class="section">
+      <div class="sec-header">
+        <div class="sec-title">✨ <span class="accent">New</span> Releases<div class="sec-line"></div></div>
+        <button class="see-all-btn" onclick="filterCategory('all')">See All <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,18 15,12 9,6"/></svg></button>
+      </div>
+      <div class="cards-grid">${filtered.slice(0,6).map(v=>videoCard(v,true)).join('')}</div>
+    </div>`;
+
+    Object.entries(groups).forEach(([cat, vids]) => {
+      html += `<div class="section">
+        <div class="sec-header">
+          <div class="sec-title">${catIcons[cat]||'🎬'} <span class="accent">${cat}</span><div class="sec-line"></div></div>
+          <button class="see-all-btn" onclick="filterCategory('${cat}')">All ${cat} (${vids.length}) <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,18 15,12 9,6"/></svg></button>
+        </div>
+        <div class="h-scroll-wrap"><div class="h-scroll">${vids.slice(0,10).map(v=>videoCard(v)).join('')}</div></div>
+      </div>`;
+    });
+
+    c.innerHTML = html;
+  } else {
+    c.innerHTML = `<div class="section" id="content-top">
+      <div class="sec-header">
+        <div class="sec-title">${catIcons[currentCategory]||'🎬'} <span class="accent">${currentCategory==='all'?'All Titles':currentCategory}</span>${searchQuery?` · "${searchQuery}"`:''}
+        <div class="sec-line"></div></div>
+        <span style="color:var(--muted);font-size:.82rem">${filtered.length} title${filtered.length!==1?'s':''}</span>
+      </div>
+      <div class="cards-grid">${filtered.map(v=>videoCard(v)).join('')}</div>
+    </div>`;
+  }
+}
+
+function featCard(v) {
+  return `<div class="feat-card" onclick="openModal('${v.id}')">
+    ${v.thumbnailUrl ? `<img class="feat-img" src="${v.thumbnailUrl}" loading="lazy" alt="${v.title||''}"/>` : `<div class="feat-ph"></div>`}
+    <div class="feat-overlay">
+      <div class="feat-cat">${v.category||'General'}</div>
+      <div class="feat-name">${v.title||'Untitled'}</div>
+      <div class="feat-row">
+        <span>▶ Watch</span>
+        ${v.duration?`<span>⏱ ${v.duration}</span>`:''}
+        <div class="feat-play-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="#000"><polygon points="5,3 19,12 5,21"/></svg></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function videoCard(v, isNew) {
+  return `<div class="v-card" onclick="openModal('${v.id}')">
+    <div class="v-thumb">
+      ${v.thumbnailUrl
+        ? `<img src="${v.thumbnailUrl}" loading="lazy" alt="${v.title||''}" style="width:100%;height:100%;object-fit:cover;display:block;"/>`
+        : `<div class="v-ph"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"><polygon points="5,3 19,12 5,21"/></svg></div>`}
+      <div class="v-hover-layer"><div class="v-play-ring"><svg width="17" height="17" viewBox="0 0 24 24" fill="#000"><polygon points="5,3 19,12 5,21"/></svg></div></div>
+      ${isNew?`<div class="new-tag">NEW</div>`:''}
+    </div>
+    <div class="v-body">
+      <div class="v-genre">${v.category||'General'}</div>
+      <div class="v-title">${v.title||'Untitled'}</div>
+      <div class="v-meta">
+        ${v.duration?`<span class="v-dur"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>${v.duration}</span>`:''}
+        ${v.year?`<span class="v-dot"></span><span>${v.year}</span>`:''}
+      </div>
+    </div>
+  </div>`;
+}
+
+window.openModal = function(id) {
+  const v = allVideos.find(x => x.id === id);
+  if (!v) return;
+  document.getElementById('modalTitle').textContent = v.title || 'Untitled';
+  document.getElementById('modalDesc').textContent = v.description || 'No description available.';
+  document.getElementById('modalTags').innerHTML = [v.category, v.duration, v.year].filter(Boolean).map(t=>`<span class="modal-tag">${t}</span>`).join('');
+  const vid = document.getElementById('modalVideo');
+  vid.src = v.videoUrl || '';
+  vid.load();
+  document.getElementById('modalWrap').classList.add('open');
+  document.body.style.overflow = 'hidden';
+};
+
+window.closeModal = function(e) { if (e.target === document.getElementById('modalWrap')) closeModalBtn(); };
+window.closeModalBtn = function() {
+  document.getElementById('modalWrap').classList.remove('open');
+  const v = document.getElementById('modalVideo');
+  v.pause(); v.src = '';
+  document.body.style.overflow = '';
+};
+
+// Keyboard close
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModalBtn(); });
+
+loadVideos();
+</script>
+</body>
+</html>

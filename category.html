@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PopCorn — Browse Category</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#050508;--surface:#0c0c14;--card:#111120;--card2:#14142a;--border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.12);--accent:#f5a623;--accent2:#e8365d;--text:#f0f0f8;--muted:#6a6a8a;--muted2:#9090b0;--nav-h:72px;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+nav{position:fixed;top:0;left:0;right:0;height:var(--nav-h);z-index:100;display:flex;align-items:center;padding:0 32px;gap:0;background:rgba(5,5,8,0.9);border-bottom:1px solid var(--border);backdrop-filter:blur(20px);}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:1.9rem;letter-spacing:3px;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-right:32px;cursor:pointer;text-decoration:none;}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
+.back-btn{display:flex;align-items:center;gap:8px;color:var(--muted2);font-size:.87rem;font-weight:500;text-decoration:none;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:10px;padding:8px 16px;transition:.2s;}
+.back-btn:hover{color:var(--text);border-color:var(--border2);}
+.search-wrap{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:10px;padding:7px 14px;transition:.2s;}
+.search-wrap:focus-within{border-color:rgba(245,166,35,0.4);}
+.search-wrap input{background:none;border:none;outline:none;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.87rem;width:170px;}
+.search-wrap input::placeholder{color:var(--muted);}
+
+/* CATEGORY HERO BANNER */
+.cat-hero{margin-top:var(--nav-h);padding:70px 60px 50px;position:relative;overflow:hidden;}
+.cat-hero-bg{position:absolute;inset:0;opacity:0.07;}
+.cat-hero-gradient{position:absolute;inset:0;background:linear-gradient(135deg,rgba(5,5,8,0.97) 0%,rgba(5,5,8,0.8) 100%);}
+.cat-eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(245,166,35,0.12);border:1px solid rgba(245,166,35,0.25);border-radius:20px;padding:5px 14px;font-size:.76rem;font-weight:700;color:var(--accent);letter-spacing:.8px;text-transform:uppercase;margin-bottom:16px;}
+.cat-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(3.5rem,8vw,6rem);line-height:.95;letter-spacing:2px;margin-bottom:16px;}
+.cat-title .glow{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.cat-desc{color:var(--muted2);font-size:1rem;max-width:500px;line-height:1.7;margin-bottom:28px;}
+.cat-stats{display:flex;gap:24px;}
+.cat-stat{text-align:center;}
+.cat-stat-val{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:1px;color:var(--accent);}
+.cat-stat-label{font-size:.75rem;color:var(--muted);margin-top:2px;}
+
+/* FILTERS */
+.filters-bar{padding:16px 40px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);flex-wrap:wrap;}
+.filter-label{font-size:.8rem;color:var(--muted);font-weight:600;letter-spacing:.3px;text-transform:uppercase;margin-right:4px;}
+.filter-btn{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:7px 16px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.83rem;font-weight:500;color:var(--muted2);transition:.22s;white-space:nowrap;}
+.filter-btn:hover{color:var(--text);border-color:var(--border2);}
+.filter-btn.active{background:rgba(245,166,35,0.1);border-color:rgba(245,166,35,0.35);color:var(--accent);}
+.sort-select{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:7px 14px;color:var(--muted2);font-family:'DM Sans',sans-serif;font-size:.83rem;outline:none;cursor:pointer;margin-left:auto;}
+.sort-select:focus{border-color:var(--border2);}
+
+/* GRID */
+.content-area{padding:32px 40px;}
+.grid-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+.grid-title{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:1px;}
+.count-badge{background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.2);border-radius:99px;padding:4px 14px;font-size:.8rem;font-weight:600;color:var(--accent);}
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px;}
+.v-card{background:var(--card);border-radius:14px;overflow:hidden;cursor:pointer;border:1px solid var(--border);transition:.3s;position:relative;}
+.v-card:hover{transform:translateY(-7px) scale(1.015);border-color:rgba(245,166,35,0.35);box-shadow:0 24px 60px rgba(0,0,0,.65);}
+.v-thumb{width:100%;aspect-ratio:16/10;position:relative;overflow:hidden;background:linear-gradient(135deg,#0f0f25,#1a1a35);}
+.v-thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s;}
+.v-card:hover .v-thumb img{transform:scale(1.08);}
+.v-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;}
+.v-hover-layer{position:absolute;inset:0;background:rgba(0,0,0,0);display:flex;align-items:center;justify-content:center;opacity:0;transition:.3s;}
+.v-card:hover .v-hover-layer{background:rgba(0,0,0,0.45);opacity:1;}
+.v-play-ring{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;transform:scale(.7);transition:.3s;}
+.v-card:hover .v-play-ring{transform:scale(1);}
+.v-body{padding:12px 14px 14px;}
+.v-genre{font-size:.7rem;font-weight:700;color:var(--accent);letter-spacing:.6px;text-transform:uppercase;margin-bottom:4px;}
+.v-title{font-weight:600;font-size:.95rem;line-height:1.35;margin-bottom:7px;color:var(--text);}
+.v-meta{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:.75rem;}
+.v-dot{width:3px;height:3px;background:var(--muted);border-radius:50%;}
+
+/* ALL CATEGORIES SIDEBAR */
+.all-cats{padding:40px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;}
+.cat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;cursor:pointer;transition:.3s;text-align:center;}
+.cat-card:hover{border-color:rgba(245,166,35,0.35);transform:translateY(-4px);}
+.cat-card-icon{font-size:2.5rem;margin-bottom:10px;}
+.cat-card-name{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:1px;margin-bottom:4px;}
+.cat-card-count{font-size:.78rem;color:var(--muted);}
+
+/* MODAL */
+.modal-wrap{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:500;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(12px);}
+.modal-wrap.open{display:flex;animation:fadeIn .2s ease;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:22px;width:100%;max-width:900px;overflow:hidden;animation:modalIn .3s cubic-bezier(.2,0,0,1.1);}
+@keyframes modalIn{from{transform:scale(.93) translateY(30px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+.modal-vid{width:100%;aspect-ratio:16/9;background:#000;}
+.modal-vid video{width:100%;height:100%;display:block;}
+.modal-body{padding:28px 32px;}
+.modal-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:10px;}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;letter-spacing:1px;line-height:1;}
+.modal-x{background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--text);width:36px;height:36px;border-radius:9px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:.2s;}
+.modal-x:hover{background:rgba(255,255,255,0.12);}
+.modal-tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.modal-tag{background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:6px;padding:4px 12px;font-size:.78rem;color:var(--muted2);}
+.modal-desc{color:var(--muted2);font-size:.95rem;line-height:1.75;}
+.modal-actions{display:flex;gap:10px;margin-top:20px;}
+.modal-btn-play{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000;font-weight:700;border:none;border-radius:11px;padding:13px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.95rem;transition:.2s;}
+.modal-btn-play:hover{opacity:.9;}
+.modal-btn-list{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.06);color:var(--text);border:1px solid var(--border2);border-radius:11px;padding:13px 20px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.95rem;font-weight:600;transition:.2s;}
+
+/* AD PLAYER */
+.ad-player-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.97);z-index:800;display:none;align-items:center;justify-content:center;flex-direction:column;}
+.ad-player-overlay.open{display:flex;}
+.ad-container{position:relative;width:min(880px,95vw);}
+.ad-video-wrap{width:100%;aspect-ratio:16/9;background:#000;border-radius:12px;overflow:hidden;position:relative;}
+.ad-video-wrap video{width:100%;height:100%;display:block;object-fit:cover;}
+.ad-top-bar{position:absolute;top:0;left:0;right:0;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(to bottom,rgba(0,0,0,0.7),transparent);z-index:5;}
+.ad-label{background:rgba(0,0,0,0.7);border:1px solid rgba(255,255,255,0.15);border-radius:6px;padding:4px 12px;font-size:.75rem;color:rgba(255,255,255,0.8);}
+.ad-skip-countdown{background:rgba(0,0,0,0.8);border:1px solid rgba(255,255,255,0.2);color:#fff;border-radius:8px;padding:8px 18px;font-size:.88rem;font-weight:600;cursor:default;transition:.3s;}
+.ad-skip-countdown.skippable{background:var(--accent);color:#000;cursor:pointer;}
+.ad-bottom-bar{padding:12px 0 0;display:flex;align-items:center;justify-content:space-between;}
+.ad-info{color:var(--muted2);font-size:.82rem;}
+.ad-brand{font-weight:600;color:var(--text);font-size:.9rem;}
+.ad-progress-bar{width:100%;height:3px;background:rgba(255,255,255,0.15);border-radius:99px;margin-top:10px;overflow:hidden;}
+.ad-progress-fill{height:100%;background:var(--accent);border-radius:99px;transition:width .3s linear;}
+
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:100px 20px;color:var(--muted);text-align:center;gap:12px;}
+.skel-card{background:var(--card);border-radius:14px;overflow:hidden;border:1px solid var(--border);}
+.skel-thumb{width:100%;aspect-ratio:16/10;background:linear-gradient(90deg,#111120 25%,#1a1a30 50%,#111120 75%);background-size:200% 100%;animation:shimmer 1.6s ease infinite;}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.skel-line{height:12px;border-radius:6px;margin:12px 14px 5px;background:#1a1a30;}
+.skel-line.short{width:55%;margin-top:4px;}
+@media(max-width:640px){.cat-hero{padding:50px 20px 32px;}.content-area{padding:20px 16px;}.filters-bar{padding:12px 16px;}.cards-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="index.html">🍿 POPCORN</a>
+  <div class="nav-right">
+    <div class="search-wrap">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" placeholder="Search in category..." id="searchInput" oninput="handleSearch()"/>
+    </div>
+    <a class="back-btn" href="index.html">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+      Back to Home
+    </a>
+  </div>
+</nav>
+
+<div id="catHeroArea"></div>
+<div class="filters-bar" id="filtersBar"></div>
+<div class="content-area">
+  <div class="grid-header">
+    <div class="grid-title" id="gridTitle">Loading...</div>
+    <div class="count-badge" id="countBadge">0 titles</div>
+  </div>
+  <div class="cards-grid" id="cardsGrid">
+    <div class="skel-card"><div class="skel-thumb"></div><div class="skel-line"></div><div class="skel-line short"></div></div>
+    <div class="skel-card"><div class="skel-thumb"></div><div class="skel-line"></div><div class="skel-line short"></div></div>
+    <div class="skel-card"><div class="skel-thumb"></div><div class="skel-line"></div><div class="skel-line short"></div></div>
+    <div class="skel-card"><div class="skel-thumb"></div><div class="skel-line"></div><div class="skel-line short"></div></div>
+    <div class="skel-card"><div class="skel-thumb"></div><div class="skel-line"></div><div class="skel-line short"></div></div>
+    <div class="skel-card"><div class="skel-thumb"></div><div class="skel-line"></div><div class="skel-line short"></div></div>
+  </div>
+</div>
+
+<!-- AD PLAYER -->
+<div class="ad-player-overlay" id="adOverlay">
+  <div class="ad-container">
+    <div class="ad-video-wrap">
+      <video id="adVideo" playsinline></video>
+      <div class="ad-top-bar">
+        <div class="ad-label">Advertisement</div>
+        <button class="ad-skip-countdown" id="adSkipBtn" onclick="skipAd()">Skip in <span id="adCountdown">5</span>s</button>
+      </div>
+    </div>
+    <div class="ad-progress-bar"><div class="ad-progress-fill" id="adProgressFill" style="width:0%"></div></div>
+    <div class="ad-bottom-bar">
+      <div><div class="ad-brand" id="adBrand">Sponsor</div><div class="ad-info" id="adInfo">Advertisement</div></div>
+      <div style="color:var(--muted);font-size:.8rem;" id="adTimeLeft"></div>
+    </div>
+  </div>
+</div>
+
+<!-- VIDEO MODAL -->
+<div class="modal-wrap" id="modalWrap" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-vid"><video id="modalVideo" controls playsinline></video></div>
+    <div class="modal-body">
+      <div class="modal-top">
+        <div class="modal-title" id="modalTitle"></div>
+        <button class="modal-x" onclick="closeModalBtn()">✕</button>
+      </div>
+      <div class="modal-tags" id="modalTags"></div>
+      <div class="modal-desc" id="modalDesc"></div>
+      <div class="modal-actions">
+        <button class="modal-btn-play" onclick="document.getElementById('modalVideo').play()">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg> Play Now
+        </button>
+        <button class="modal-btn-list" onclick="window.location.href='index.html'">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add to List
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey:"AIzaSyABdKh8LYCGNkpuJ_OvW4ciYd0OLoe8DBw",authDomain:"pop-corn-c4918.firebaseapp.com",
+  projectId:"pop-corn-c4918",storageBucket:"pop-corn-c4918.firebasestorage.app",
+  messagingSenderId:"721578587416",appId:"1:721578587416:web:47f27eb996b78730675a6d"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const params = new URLSearchParams(window.location.search);
+const CAT = params.get('cat') || 'all';
+let allVideos = [], allAds = [];
+let searchQuery = '';
+let adCountdownTimer = null;
+
+const catMeta = {
+  Action:{icon:'⚡',desc:'High-octane thrills, explosive action sequences, and heroes who never back down.',bg:'linear-gradient(135deg,#200008 0%,#400010 50%,#100020 100%)'},
+  Comedy:{icon:'😂',desc:'Laugh-out-loud moments, witty writing, and feel-good stories that brighten your day.',bg:'linear-gradient(135deg,#201000 0%,#402010 50%,#100800 100%)'},
+  Drama:{icon:'🎭',desc:'Powerful performances and emotionally rich stories that stay with you long after the credits.',bg:'linear-gradient(135deg,#000820 0%,#001040 50%,#000818 100%)'},
+  Horror:{icon:'👻',desc:'Spine-chilling frights, psychological terror, and things that go bump in the dark.',bg:'linear-gradient(135deg,#080018 0%,#140028 50%,#050010 100%)'},
+  Documentary:{icon:'📹',desc:'Real stories, real people, real impact. Explore the world through documentary filmmaking.',bg:'linear-gradient(135deg,#001820 0%,#003040 50%,#000c14 100%)'},
+  Romance:{icon:'❤️',desc:'Love stories that make your heart flutter — from classic romance to modern love.',bg:'linear-gradient(135deg,#200010 0%,#400020 50%,#100008 100%)'},
+  Thriller:{icon:'🔪',desc:'Edge-of-your-seat suspense, unexpected twists, and tension you can cut with a knife.',bg:'linear-gradient(135deg,#080018 0%,#181028 50%,#040010 100%)'},
+  Animation:{icon:'🎨',desc:'Vibrant animated worlds, beloved characters, and stories for all ages.',bg:'linear-gradient(135deg,#001020 0%,#002040 50%,#000818 100%)'},
+  'Sci-Fi':{icon:'🚀',desc:'Explore the cosmos, future technologies, and what it means to be human in distant worlds.',bg:'linear-gradient(135deg,#000818 0%,#001830 50%,#000510 100%)'},
+  Fantasy:{icon:'🧙',desc:'Mythical creatures, magical realms, and epic quests in worlds beyond imagination.',bg:'linear-gradient(135deg,#100020 0%,#200040 50%,#080010 100%)'},
+  Mystery:{icon:'🔍',desc:'Unravel clues, suspect everyone, and solve mysteries that keep you guessing.',bg:'linear-gradient(135deg,#040810 0%,#081020 50%,#020408 100%)'},
+  Adventure:{icon:'🗺️',desc:'Epic journeys, unexplored lands, and the thrill of discovery around every corner.',bg:'linear-gradient(135deg,#081400 0%,#102800 50%,#040a00 100%)'},
+};
+
+const meta = catMeta[CAT] || {icon:'🎬',desc:'Explore our full collection of curated content.',bg:'linear-gradient(135deg,#050508,#0c0c14)'};
+
+// Build hero
+document.getElementById('catHeroArea').innerHTML = `
+  <div class="cat-hero">
+    <div class="cat-hero-bg" style="background:${meta.bg}"></div>
+    <div class="cat-hero-gradient"></div>
+    <div style="position:relative;z-index:5;">
+      <div class="cat-eyebrow">${meta.icon} Genre</div>
+      <div class="cat-title"><span class="glow">${CAT==='all'?'ALL FILMS':CAT.toUpperCase()}</span></div>
+      <div class="cat-desc">${meta.desc}</div>
+      <div class="cat-stats" id="catStats">
+        <div class="cat-stat"><div class="cat-stat-val" id="statTotal">—</div><div class="cat-stat-label">Total Films</div></div>
+        <div class="cat-stat"><div class="cat-stat-val">HD</div><div class="cat-stat-label">Quality</div></div>
+        <div class="cat-stat"><div class="cat-stat-val">Free</div><div class="cat-stat-label">To Watch</div></div>
+      </div>
+    </div>
+  </div>`;
+
+document.title = `PopCorn — ${CAT} Films`;
+
+async function load() {
+  try {
+    const q = query(collection(db,'videos'), orderBy('createdAt','desc'));
+    const snap = await getDocs(q);
+    allVideos = snap.docs.map(d=>({id:d.id,...d.data()}));
+  } catch(e){ console.error(e); }
+  try {
+    const aq = query(collection(db,'advertisements'), orderBy('createdAt','desc'));
+    const asnap = await getDocs(aq);
+    allAds = asnap.docs.map(d=>({id:d.id,...d.data()})).filter(a=>a.isActive!==false);
+  } catch(e){ console.error(e); }
+  buildFilters();
+  render();
+}
+
+function buildFilters() {
+  const years = [...new Set(allVideos.map(v=>v.year).filter(Boolean))].sort().reverse();
+  document.getElementById('filtersBar').innerHTML = `
+    <span class="filter-label">Year:</span>
+    <button class="filter-btn active" onclick="setYear('all',this)">All Years</button>
+    ${years.slice(0,5).map(y=>`<button class="filter-btn" onclick="setYear('${y}',this)">${y}</button>`).join('')}
+    <select class="sort-select" onchange="setSort(this.value)">
+      <option value="newest">Newest First</option>
+      <option value="oldest">Oldest First</option>
+      <option value="alpha">A-Z</option>
+    </select>`;
+}
+
+let filterYear = 'all';
+let sortMode = 'newest';
+window.setYear = (y, el) => { filterYear=y; document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active')); el.classList.add('active'); render(); };
+window.setSort = (v) => { sortMode=v; render(); };
+window.handleSearch = () => { searchQuery=document.getElementById('searchInput').value.toLowerCase(); render(); };
+
+function render() {
+  let vids = allVideos.filter(v => {
+    const mc = CAT==='all' || v.category===CAT;
+    const my = filterYear==='all' || v.year===filterYear;
+    const ms = !searchQuery || v.title?.toLowerCase().includes(searchQuery) || v.description?.toLowerCase().includes(searchQuery);
+    return mc && my && ms;
+  });
+  if (sortMode==='oldest') vids = [...vids].reverse();
+  else if (sortMode==='alpha') vids = [...vids].sort((a,b)=>(a.title||'').localeCompare(b.title||''));
+  document.getElementById('statTotal').textContent = vids.length;
+  document.getElementById('gridTitle').textContent = `${CAT==='all'?'All Films':CAT} Collection`;
+  document.getElementById('countBadge').textContent = `${vids.length} title${vids.length!==1?'s':''}`;
+  const grid = document.getElementById('cardsGrid');
+  if (!vids.length) { grid.innerHTML = `<div class="empty" style="grid-column:1/-1;"><svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><p>No ${CAT} films found</p><small>Check back later or browse another genre.</small></div>`; return; }
+  grid.innerHTML = vids.map(v=>`<div class="v-card" onclick="openModal('${v.id}')">
+    <div class="v-thumb">
+      ${v.thumbnailUrl?`<img src="${v.thumbnailUrl}" loading="lazy" alt="${v.title||''}" style="width:100%;height:100%;object-fit:cover;display:block;"/>`:`<div class="v-ph"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"><polygon points="5,3 19,12 5,21"/></svg></div>`}
+      <div class="v-hover-layer"><div class="v-play-ring"><svg width="17" height="17" viewBox="0 0 24 24" fill="#000"><polygon points="5,3 19,12 5,21"/></svg></div></div>
+    </div>
+    <div class="v-body">
+      <div class="v-genre">${v.category||'General'}</div>
+      <div class="v-title">${v.title||'Untitled'}</div>
+      <div class="v-meta">${v.duration?`<span>${v.duration}</span>`:''} ${v.year?`<span class="v-dot"></span><span>${v.year}</span>`:''}</div>
+    </div></div>`).join('');
+}
+
+// AD SYSTEM
+function playAd(cb) {
+  if (!allAds.length) { cb(); return; }
+  const ad = allAds[Math.floor(Math.random()*allAds.length)];
+  const vidEl = document.getElementById('adVideo');
+  vidEl.src = ad.videoUrl||'';
+  vidEl.load();
+  document.getElementById('adBrand').textContent = ad.brand||'Sponsor';
+  document.getElementById('adInfo').textContent = ad.description||'Advertisement';
+  document.getElementById('adOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+  const btn = document.getElementById('adSkipBtn');
+  btn.className='ad-skip-countdown';
+  btn.innerHTML='Skip in <span id="adCountdown">5</span>s';
+  let secs=5;
+  vidEl.play().catch(()=>{});
+  adCountdownTimer = setInterval(()=>{
+    secs--;
+    const el=document.getElementById('adCountdown'); if(el)el.textContent=secs;
+    if(secs<=0){clearInterval(adCountdownTimer);btn.className='ad-skip-countdown skippable';btn.textContent='Skip Ad ›';}
+  },1000);
+  vidEl.ontimeupdate=()=>{
+    const pct=vidEl.duration?(vidEl.currentTime/vidEl.duration*100):0;
+    document.getElementById('adProgressFill').style.width=pct+'%';
+    const left=Math.ceil(vidEl.duration-vidEl.currentTime);
+    document.getElementById('adTimeLeft').textContent=!isNaN(left)?`0:${String(left).padStart(2,'0')} remaining`:'';
+  };
+  vidEl.onended=()=>{closeAd();cb();};
+  window._adCb=cb;
+}
+window.skipAd=()=>{
+  if(!document.getElementById('adSkipBtn').classList.contains('skippable'))return;
+  closeAd(); if(window._adCb){window._adCb();window._adCb=null;}
+};
+function closeAd(){
+  clearInterval(adCountdownTimer);
+  document.getElementById('adOverlay').classList.remove('open');
+  document.body.style.overflow='';
+  const v=document.getElementById('adVideo');v.pause();v.src='';
+}
+
+window.openModal=function(id){
+  const v=allVideos.find(x=>x.id===id);if(!v)return;
+  document.getElementById('modalTitle').textContent=v.title||'Untitled';
+  document.getElementById('modalDesc').textContent=v.description||'';
+  document.getElementById('modalTags').innerHTML=[v.category,v.duration,v.year].filter(Boolean).map(t=>`<span class="modal-tag">${t}</span>`).join('');
+  playAd(()=>{
+    const vid=document.getElementById('modalVideo');
+    vid.src=v.videoUrl||'';vid.load();
+    document.getElementById('modalWrap').classList.add('open');
+    document.body.style.overflow='hidden';
+  });
+};
+window.closeModal=function(e){if(e.target===document.getElementById('modalWrap'))closeModalBtn();};
+window.closeModalBtn=function(){
+  document.getElementById('modalWrap').classList.remove('open');
+  const v=document.getElementById('modalVideo');v.pause();v.src='';
+  document.body.style.overflow='';
+};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModalBtn();closeAd();}});
+load();
+</script>
+</body>
+</html>

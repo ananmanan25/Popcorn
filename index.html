@@ -1,0 +1,1769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PopCorn — Stream Everything</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:#050508;--surface:#0c0c14;--card:#111120;--card2:#14142a;
+  --border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.12);
+  --accent:#f5a623;--accent2:#e8365d;--accent3:#7c3aed;
+  --neon:#00f5ff;--neon2:#a855f7;
+  --text:#f0f0f8;--muted:#6a6a8a;--muted2:#9090b0;
+  --nav-h:72px;--r:14px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+
+/* LOADER */
+#loader{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .6s,visibility .6s;}
+#loader.hidden{opacity:0;visibility:hidden;pointer-events:none;}
+.loader-logo{font-family:'Bebas Neue',sans-serif;font-size:3.5rem;letter-spacing:4px;background:linear-gradient(135deg,var(--accent),var(--accent2),var(--neon2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:40px;}
+.loader-bar-wrap{width:280px;height:3px;background:rgba(255,255,255,0.06);border-radius:99px;overflow:hidden;margin-bottom:18px;}
+.loader-bar{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2),var(--neon));border-radius:99px;animation:loadBar 2.4s cubic-bezier(.4,0,.2,1) forwards;}
+@keyframes loadBar{0%{width:0}60%{width:75%}90%{width:92%}100%{width:100%}}
+.loader-text{color:var(--muted2);font-size:.82rem;letter-spacing:2px;text-transform:uppercase;}
+.loader-orbs{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
+.loader-orb{position:absolute;border-radius:50%;filter:blur(80px);animation:orbDrift 4s ease-in-out infinite alternate;}
+.loader-orb:nth-child(1){width:400px;height:400px;background:rgba(245,166,35,0.12);top:-100px;left:-100px;}
+.loader-orb:nth-child(2){width:350px;height:350px;background:rgba(232,54,93,0.1);bottom:-80px;right:-80px;animation-delay:.8s;}
+.loader-orb:nth-child(3){width:300px;height:300px;background:rgba(124,58,237,0.1);top:50%;left:50%;transform:translate(-50%,-50%);animation-delay:.4s;}
+@keyframes orbDrift{0%{transform:scale(1) translate(0,0)}100%{transform:scale(1.2) translate(20px,-20px)}}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;height:var(--nav-h);z-index:100;display:flex;align-items:center;padding:0 32px;gap:0;background:rgba(5,5,8,0.85);border-bottom:1px solid var(--border);backdrop-filter:blur(20px) saturate(180%);}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:1.9rem;letter-spacing:3px;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-right:32px;flex-shrink:0;cursor:pointer;}
+.nav-main{display:flex;align-items:center;gap:2px;flex:1;}
+.nav-item{position:relative;}
+.nav-btn{background:none;border:none;color:var(--muted2);font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:500;padding:8px 14px;border-radius:10px;cursor:pointer;transition:all .2s;white-space:nowrap;display:flex;align-items:center;gap:5px;}
+.nav-btn:hover,.nav-btn.active{color:var(--text);background:rgba(255,255,255,0.06);}
+.nav-btn.active::after{content:'';position:absolute;bottom:-1px;left:50%;transform:translateX(-50%);width:20px;height:2px;background:var(--accent);border-radius:2px;}
+.nav-dropdown{position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:16px;min-width:480px;opacity:0;visibility:hidden;transition:all .2s;pointer-events:none;box-shadow:0 24px 60px rgba(0,0,0,0.7);}
+.nav-item:hover .nav-dropdown{opacity:1;visibility:visible;pointer-events:all;}
+.dropdown-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.dd-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:.2s;border:1px solid transparent;}
+.dd-item:hover{background:rgba(255,255,255,0.05);border-color:var(--border2);}
+.dd-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;}
+.dd-label{font-size:.82rem;font-weight:500;color:var(--text);}
+.dd-sub{font-size:.72rem;color:var(--muted);margin-top:1px;}
+.nav-right{display:flex;align-items:center;gap:10px;margin-left:auto;}
+.search-wrap{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:10px;padding:7px 14px;transition:.2s;}
+.search-wrap:focus-within{border-color:rgba(245,166,35,0.4);background:rgba(245,166,35,0.04);}
+.search-wrap input{background:none;border:none;outline:none;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.87rem;width:170px;}
+.search-wrap input::placeholder{color:var(--muted);}
+.nav-icon-btn{background:rgba(255,255,255,0.05);border:1px solid var(--border);color:var(--muted2);width:36px;height:36px;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;position:relative;}
+.nav-icon-btn:hover{color:var(--text);border-color:var(--border2);}
+.notif-dot{position:absolute;top:7px;right:7px;width:7px;height:7px;background:var(--accent2);border-radius:50%;border:2px solid var(--surface);}
+
+/* PROFILE MENU — JS-controlled, not hover */
+.profile-btn{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:10px;padding:5px 12px 5px 5px;cursor:pointer;transition:.2s;position:relative;user-select:none;}
+.profile-btn:hover{border-color:var(--border2);}
+.profile-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:#000;overflow:hidden;flex-shrink:0;}
+.profile-avatar img{width:100%;height:100%;object-fit:cover;}
+.profile-name{font-size:.83rem;font-weight:500;color:var(--text);max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.profile-dropdown{position:absolute;top:calc(100% + 8px);right:0;background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:8px;min-width:220px;opacity:0;visibility:hidden;transition:all .2s;pointer-events:none;box-shadow:0 24px 60px rgba(0,0,0,0.7);z-index:200;}
+.profile-dropdown.open{opacity:1;visibility:visible;pointer-events:all;}
+.profile-header{padding:12px 14px;border-bottom:1px solid var(--border);margin-bottom:8px;}
+.profile-email{font-size:.75rem;color:var(--muted);margin-top:2px;}
+.profile-tier{display:inline-flex;align-items:center;gap:5px;background:linear-gradient(135deg,rgba(245,166,35,0.15),rgba(232,54,93,0.15));border:1px solid rgba(245,166,35,0.25);border-radius:6px;padding:3px 10px;font-size:.72rem;font-weight:700;color:var(--accent);margin-top:6px;}
+.pd-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:9px;cursor:pointer;font-size:.85rem;font-weight:500;color:var(--muted2);transition:.2s;}
+.pd-item:hover{color:var(--text);background:rgba(255,255,255,0.05);}
+.pd-item svg{flex-shrink:0;}
+.pd-divider{height:1px;background:var(--border);margin:6px 0;}
+.pd-item.danger{color:#ef4444;}
+.pd-item.danger:hover{background:rgba(239,68,68,0.08);}
+
+/* AUTH MODAL */
+.auth-modal-wrap{position:fixed;inset:0;background:rgba(0,0,0,0.94);z-index:600;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(16px);}
+.auth-modal-wrap.open{display:flex;}
+.auth-modal{background:var(--surface);border:1px solid var(--border2);border-radius:24px;width:100%;max-width:420px;overflow:hidden;position:relative;animation:authIn .35s cubic-bezier(.2,0,0,1.1);}
+@keyframes authIn{from{transform:scale(.92) translateY(24px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+.auth-strip{height:4px;background:linear-gradient(90deg,var(--accent),var(--accent2),var(--accent3),var(--neon));}
+.auth-inner{padding:36px 36px 32px;}
+.auth-x{position:absolute;top:16px;right:16px;background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--muted2);width:32px;height:32px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;font-size:.9rem;z-index:2;}
+.auth-x:hover{background:rgba(255,255,255,0.1);color:var(--text);}
+.auth-logo{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;letter-spacing:3px;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px;text-align:center;}
+.auth-tagline{color:var(--muted);font-size:.85rem;text-align:center;margin-bottom:28px;}
+.auth-step{display:none;animation:stepIn .25s ease;}
+.auth-step.active{display:block;}
+@keyframes stepIn{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:translateX(0)}}
+.provider-btns{display:flex;flex-direction:column;gap:10px;margin-bottom:20px;}
+.provider-btn{display:flex;align-items:center;gap:14px;width:100%;padding:13px 18px;border-radius:12px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.93rem;font-weight:600;transition:.2s;border:1px solid;position:relative;overflow:hidden;}
+.provider-btn:hover{transform:translateY(-1px);}
+.provider-btn:active{transform:translateY(0);}
+.provider-btn:disabled{opacity:.6;cursor:not-allowed;transform:none;}
+.google-btn{background:#fff;color:#1f1f1f;border-color:#e0e0e0;}
+.google-btn:hover:not(:disabled){box-shadow:0 6px 24px rgba(255,255,255,0.12);}
+.apple-btn{background:#1a1a1a;color:#fff;border-color:rgba(255,255,255,0.15);}
+.apple-btn:hover:not(:disabled){background:#222;box-shadow:0 6px 24px rgba(0,0,0,0.4);}
+.email-btn{background:rgba(245,166,35,0.08);color:var(--text);border-color:rgba(245,166,35,0.25);}
+.email-btn:hover:not(:disabled){background:rgba(245,166,35,0.12);border-color:rgba(245,166,35,0.4);}
+.provider-icon{width:22px;height:22px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.provider-label{flex:1;text-align:left;}
+.auth-divider{display:flex;align-items:center;gap:12px;margin:16px 0;color:var(--muted);font-size:.78rem;}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--border2);}
+.auth-back-btn{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:.82rem;cursor:pointer;margin-bottom:20px;transition:.2s;background:none;border:none;font-family:'DM Sans',sans-serif;}
+.auth-back-btn:hover{color:var(--text);}
+.auth-field{margin-bottom:14px;}
+.auth-field label{display:block;font-size:.75rem;font-weight:600;color:var(--muted);letter-spacing:.4px;text-transform:uppercase;margin-bottom:7px;}
+.auth-input{width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border2);border-radius:11px;padding:12px 16px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.95rem;outline:none;transition:.2s;}
+.auth-input:focus{border-color:var(--accent);background:rgba(245,166,35,0.04);}
+.auth-input::placeholder{color:var(--muted);}
+.auth-input.error{border-color:var(--accent2);}
+.auth-input-wrap{position:relative;}
+.auth-input-wrap .auth-input{padding-right:44px;}
+.toggle-pw{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;padding:4px;display:flex;align-items:center;}
+.toggle-pw:hover{color:var(--text);}
+.pw-strength{margin-top:8px;}
+.pw-strength-bar{display:flex;gap:4px;margin-bottom:5px;}
+.pw-seg{height:3px;flex:1;border-radius:99px;background:rgba(255,255,255,0.1);transition:.3s;}
+.pw-seg.weak{background:var(--accent2);}
+.pw-seg.medium{background:var(--accent);}
+.pw-seg.strong{background:#22c55e;}
+.pw-strength-text{font-size:.72rem;color:var(--muted);}
+.auth-submit-btn{width:100%;padding:13px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000;font-weight:700;border:none;border-radius:12px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.97rem;transition:.2s;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:20px;}
+.auth-submit-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 10px 36px rgba(245,166,35,0.35);}
+.auth-submit-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.auth-tabs{display:flex;background:rgba(255,255,255,0.04);border-radius:10px;padding:3px;margin-bottom:20px;}
+.auth-tab{flex:1;padding:9px;text-align:center;border-radius:8px;cursor:pointer;font-size:.87rem;font-weight:500;color:var(--muted);transition:.2s;}
+.auth-tab.active{background:rgba(245,166,35,0.12);color:var(--accent);border:1px solid rgba(245,166,35,0.2);}
+.auth-error{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);border-radius:9px;padding:10px 14px;font-size:.83rem;color:#f87171;margin-bottom:14px;display:none;}
+.auth-error.show{display:block;}
+.auth-success{background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.2);border-radius:9px;padding:10px 14px;font-size:.83rem;color:#4ade80;margin-bottom:14px;display:none;}
+.auth-success.show{display:block;}
+.auth-forgot{text-align:right;margin-top:-8px;margin-bottom:14px;}
+.auth-forgot a{font-size:.8rem;color:var(--muted2);text-decoration:none;transition:.2s;cursor:pointer;}
+.auth-forgot a:hover{color:var(--accent);}
+.btn-spinner{width:17px;height:17px;border:2px solid rgba(0,0,0,0.25);border-top-color:#000;border-radius:50%;animation:spin .6s linear infinite;display:none;}
+.auth-note{font-size:.74rem;color:var(--muted);line-height:1.6;text-align:center;margin-top:18px;}
+.auth-note a{color:var(--accent);text-decoration:none;}
+.auth-verify-icon{font-size:3rem;text-align:center;margin-bottom:12px;}
+.auth-verify-title{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:1px;text-align:center;margin-bottom:8px;}
+.auth-verify-desc{color:var(--muted2);font-size:.88rem;text-align:center;line-height:1.7;margin-bottom:24px;}
+.auth-verify-email{font-weight:600;color:var(--text);}
+.auth-resend-btn{background:rgba(255,255,255,0.06);border:1px solid var(--border2);color:var(--muted2);font-family:'DM Sans',sans-serif;font-size:.87rem;padding:11px 20px;border-radius:10px;cursor:pointer;width:100%;transition:.2s;}
+.auth-resend-btn:hover{color:var(--text);background:rgba(255,255,255,0.1);}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* UPGRADE MODAL */
+.upgrade-modal{max-width:560px;}
+.upgrade-hero{background:linear-gradient(135deg,rgba(245,166,35,0.12),rgba(232,54,93,0.12));border:1px solid rgba(245,166,35,0.2);border-radius:16px;padding:24px;margin-bottom:28px;text-align:center;}
+.upgrade-hero-title{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:1px;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.plans-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:24px;}
+.plan-card{background:var(--card);border:1px solid var(--border2);border-radius:14px;padding:18px;cursor:pointer;transition:.3s;position:relative;}
+.plan-card:hover{border-color:rgba(245,166,35,0.4);}
+.plan-card.featured{border-color:var(--accent);background:rgba(245,166,35,0.06);}
+.plan-badge{position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000;font-size:.68rem;font-weight:800;border-radius:99px;padding:3px 12px;white-space:nowrap;}
+.plan-name{font-weight:700;font-size:.95rem;margin-bottom:4px;}
+.plan-price{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:1px;color:var(--accent);}
+.plan-period{font-size:.75rem;color:var(--muted);margin-bottom:10px;}
+.plan-features{font-size:.78rem;color:var(--muted2);line-height:1.8;}
+.plan-feature{display:flex;align-items:center;gap:6px;}
+.plan-feature::before{content:'✓';color:var(--accent);font-weight:700;}
+.btn-upgrade{width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000;font-weight:700;border:none;border-radius:12px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:1rem;transition:.2s;}
+.btn-upgrade:hover{opacity:.9;transform:translateY(-2px);}
+
+/* HERO */
+.hero{height:95vh;min-height:600px;position:relative;overflow:hidden;margin-top:var(--nav-h);display:flex;align-items:flex-end;}
+.hero-slides{position:absolute;inset:0;}
+.hero-slide{position:absolute;inset:0;opacity:0;transition:opacity 1.2s ease;display:flex;align-items:flex-end;}
+.hero-slide.active{opacity:1;}
+.slide-bg{position:absolute;inset:0;background-size:cover;background-position:center;transform:scale(1.05);transition:transform 8s ease;}
+.hero-slide.active .slide-bg{transform:scale(1);}
+.slide-gradient{position:absolute;inset:0;background:linear-gradient(135deg,rgba(5,5,8,0.95) 0%,rgba(5,5,8,0.5) 50%,rgba(5,5,8,0.8) 100%);}
+.slide-bottom{position:absolute;bottom:0;left:0;right:0;height:50%;background:linear-gradient(to top,var(--bg) 0%,transparent 100%);}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(0,245,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,245,255,0.03) 1px,transparent 1px);background-size:60px 60px;animation:gridPan 20s linear infinite;}
+@keyframes gridPan{0%{background-position:0 0}100%{background-position:60px 60px}}
+.slide-content{position:relative;z-index:5;padding:0 60px 90px;max-width:660px;}
+.slide-eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(245,166,35,0.12);border:1px solid rgba(245,166,35,0.25);border-radius:20px;padding:5px 14px;font-size:.76rem;font-weight:600;color:var(--accent);letter-spacing:.8px;text-transform:uppercase;margin-bottom:18px;}
+.slide-eyebrow span{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:blink 1.4s ease infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.slide-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(3rem,8vw,6.5rem);line-height:.95;letter-spacing:1px;margin-bottom:18px;}
+.slide-title .glow{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.slide-desc{color:var(--muted2);font-size:1rem;line-height:1.7;max-width:480px;margin-bottom:28px;}
+.slide-meta{display:flex;align-items:center;gap:16px;margin-bottom:32px;}
+.slide-tag{background:rgba(255,255,255,0.08);border:1px solid var(--border2);border-radius:6px;padding:4px 12px;font-size:.78rem;font-weight:500;color:var(--text);}
+.slide-rating{display:flex;align-items:center;gap:5px;font-size:.85rem;color:var(--accent);font-weight:600;}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap;}
+.btn-play{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000;font-weight:700;border:none;border-radius:12px;padding:14px 30px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.97rem;transition:.25s;box-shadow:0 8px 32px rgba(245,166,35,0.35);}
+.btn-play:hover{transform:translateY(-3px);box-shadow:0 16px 48px rgba(245,166,35,0.5);}
+.btn-ghost{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.06);color:var(--text);font-weight:600;border:1px solid var(--border2);border-radius:12px;padding:14px 28px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.97rem;transition:.25s;backdrop-filter:blur(10px);}
+.btn-ghost:hover{background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.2);}
+.hero-nav{position:absolute;bottom:36px;right:60px;z-index:10;display:flex;align-items:center;gap:10px;}
+.hero-dot{width:28px;height:3px;background:rgba(255,255,255,0.2);border-radius:99px;cursor:pointer;transition:.4s;}
+.hero-dot.active{width:48px;background:var(--accent);}
+.hero-arrows{position:absolute;right:60px;top:50%;transform:translateY(-50%);z-index:10;display:flex;flex-direction:column;gap:10px;}
+.hero-arr{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.06);border:1px solid var(--border2);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;backdrop-filter:blur(10px);}
+.hero-arr:hover{background:rgba(255,255,255,0.12);}
+.scroll-hint{position:absolute;bottom:36px;left:60px;z-index:10;display:flex;align-items:center;gap:10px;color:var(--muted);font-size:.78rem;animation:float2 3s ease-in-out infinite;}
+@keyframes float2{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.scroll-wheel{width:22px;height:36px;border:1px solid rgba(255,255,255,0.2);border-radius:99px;display:flex;align-items:flex-start;justify-content:center;padding-top:6px;}
+.scroll-wheel::after{content:'';width:4px;height:8px;background:var(--muted);border-radius:99px;animation:wheel 1.8s ease infinite;}
+@keyframes wheel{0%{transform:translateY(0);opacity:1}100%{transform:translateY(10px);opacity:0}}
+
+/* CAT PILLS */
+.cat-section{padding:24px 40px 8px;display:flex;align-items:center;gap:12px;overflow-x:auto;scrollbar-width:none;}
+.cat-section::-webkit-scrollbar{display:none;}
+.cat-pill{flex-shrink:0;background:var(--card);border:1px solid var(--border);border-radius:99px;padding:8px 20px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.84rem;font-weight:500;color:var(--muted2);transition:.22s;white-space:nowrap;display:flex;align-items:center;gap:6px;}
+.cat-pill:hover{color:var(--text);border-color:var(--border2);background:rgba(255,255,255,0.05);}
+.cat-pill.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000;border-color:transparent;font-weight:700;}
+
+/* SECTIONS */
+.section{padding:16px 40px 36px;}
+.sec-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.sec-title{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:1px;display:flex;align-items:center;gap:10px;}
+.sec-title .accent{color:var(--accent);}
+.sec-line{flex:1;height:1px;background:linear-gradient(90deg,var(--border2),transparent);margin-left:14px;}
+.see-all-btn{background:none;border:1px solid var(--border);color:var(--muted2);border-radius:8px;padding:6px 14px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem;transition:.2s;display:flex;align-items:center;gap:5px;text-decoration:none;}
+.see-all-btn:hover{color:var(--text);border-color:var(--border2);}
+
+/* FEATURED STRIP */
+.featured-strip{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px;}
+.feat-card{position:relative;border-radius:18px;overflow:hidden;aspect-ratio:16/9;cursor:pointer;border:1px solid var(--border);transition:.3s;}
+.feat-card:hover{transform:translateY(-5px) scale(1.01);border-color:rgba(245,166,35,0.35);box-shadow:0 24px 70px rgba(0,0,0,.7);}
+.feat-img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s;}
+.feat-card:hover .feat-img{transform:scale(1.05);}
+.feat-ph{width:100%;height:100%;background:linear-gradient(135deg,#0f0f25,#1a0f35,#0f1a35);}
+.feat-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(5,5,8,.98) 0%,rgba(5,5,8,.3) 55%,transparent 100%);display:flex;flex-direction:column;justify-content:flex-end;padding:22px;z-index:3;transition:.3s;}
+.feat-card:hover .feat-overlay{background:linear-gradient(to top,rgba(5,5,8,1) 0%,rgba(5,5,8,.5) 65%,transparent 100%);}
+.feat-cat{font-size:.72rem;font-weight:700;color:var(--accent);letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px;}
+.feat-name{font-family:'Bebas Neue',sans-serif;font-size:1.7rem;letter-spacing:.5px;line-height:1.05;margin-bottom:8px;}
+.feat-row{display:flex;align-items:center;gap:10px;color:var(--muted2);font-size:.78rem;}
+.feat-play-btn{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;margin-left:auto;transform:scale(0);opacity:0;transition:.3s;}
+.feat-card:hover .feat-play-btn{transform:scale(1);opacity:1;}
+
+/* CARD GRID */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:16px;}
+.v-card{background:var(--card);border-radius:14px;overflow:hidden;cursor:pointer;border:1px solid var(--border);transition:.3s;position:relative;}
+.v-card:hover{transform:translateY(-7px) scale(1.015);border-color:rgba(245,166,35,0.35);box-shadow:0 24px 60px rgba(0,0,0,.65);}
+.v-thumb{width:100%;aspect-ratio:16/10;position:relative;overflow:hidden;background:linear-gradient(135deg,#0f0f25,#1a1a35);}
+.v-thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s;}
+.v-card:hover .v-thumb img{transform:scale(1.08);}
+.v-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;}
+.v-hover-layer{position:absolute;inset:0;background:rgba(0,0,0,0);display:flex;align-items:center;justify-content:center;opacity:0;transition:.3s;}
+.v-card:hover .v-hover-layer{background:rgba(0,0,0,0.45);opacity:1;}
+.v-play-ring{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;transform:scale(.7);transition:.3s;box-shadow:0 0 40px rgba(245,166,35,.5);}
+.v-card:hover .v-play-ring{transform:scale(1);}
+.new-tag{position:absolute;top:10px;left:10px;background:var(--accent2);color:#fff;font-size:.66rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;border-radius:5px;padding:3px 8px;}
+.v-body{padding:12px 14px 14px;}
+.v-genre{font-size:.7rem;font-weight:700;color:var(--accent);letter-spacing:.6px;text-transform:uppercase;margin-bottom:4px;}
+.v-title{font-weight:600;font-size:.92rem;line-height:1.35;margin-bottom:7px;color:var(--text);}
+.v-meta{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:.75rem;flex-wrap:wrap;}
+.v-dot{width:3px;height:3px;background:var(--muted);border-radius:50%;}
+
+/* HORIZONTAL SCROLL */
+.h-scroll{display:flex;gap:14px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;}
+.h-scroll::-webkit-scrollbar{display:none;}
+.h-scroll .v-card{min-width:190px;flex-shrink:0;}
+
+/* AD PLAYER */
+.ad-player-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.97);z-index:800;display:none;align-items:center;justify-content:center;flex-direction:column;}
+.ad-player-overlay.open{display:flex;}
+.ad-container{position:relative;width:min(880px,95vw);}
+.ad-video-wrap{width:100%;aspect-ratio:16/9;background:#000;border-radius:12px;overflow:hidden;position:relative;}
+.ad-video-wrap video{width:100%;height:100%;display:block;object-fit:cover;}
+.ad-top-bar{position:absolute;top:0;left:0;right:0;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(to bottom,rgba(0,0,0,0.7),transparent);z-index:5;}
+.ad-label{background:rgba(0,0,0,0.7);border:1px solid rgba(255,255,255,0.15);border-radius:6px;padding:4px 12px;font-size:.75rem;color:rgba(255,255,255,0.8);letter-spacing:.5px;}
+.ad-skip-countdown{background:rgba(0,0,0,0.8);border:1px solid rgba(255,255,255,0.2);color:#fff;border-radius:8px;padding:8px 18px;font-size:.88rem;font-weight:600;cursor:default;transition:.3s;}
+.ad-skip-countdown.skippable{background:var(--accent);color:#000;cursor:pointer;border-color:transparent;}
+.ad-skip-countdown.skippable:hover{background:linear-gradient(135deg,var(--accent),var(--accent2));}
+.ad-bottom-bar{padding:12px 0 0;display:flex;align-items:center;justify-content:space-between;}
+.ad-info{color:var(--muted2);font-size:.82rem;}
+.ad-brand{font-weight:600;color:var(--text);font-size:.9rem;}
+.ad-progress-bar{width:100%;height:3px;background:rgba(255,255,255,0.15);border-radius:99px;margin-top:10px;overflow:hidden;}
+.ad-progress-fill{height:100%;background:var(--accent);border-radius:99px;transition:width .3s linear;}
+
+/* VIDEO MODAL */
+.modal-wrap{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:500;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(12px);}
+.modal-wrap.open{display:flex;animation:fadeIn .2s ease;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:22px;width:100%;max-width:900px;overflow:hidden;animation:modalIn .3s cubic-bezier(.2,0,0,1.1);}
+@keyframes modalIn{from{transform:scale(.96);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-vid{width:100%;aspect-ratio:16/9;background:#000;}
+.modal-vid video{width:100%;height:100%;display:block;}
+.modal-body{padding:28px 32px;}
+.modal-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:10px;}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;letter-spacing:1px;line-height:1;}
+.modal-x{background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--text);width:36px;height:36px;border-radius:9px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:.2s;flex-shrink:0;}
+.modal-x:hover{background:rgba(255,255,255,0.12);}
+.modal-tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.modal-tag{background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:6px;padding:4px 12px;font-size:.78rem;color:var(--muted2);}
+.modal-desc{color:var(--muted2);font-size:.95rem;line-height:1.75;}
+.modal-actions{display:flex;gap:10px;margin-top:20px;}
+.modal-btn-play{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000;font-weight:700;border:none;border-radius:11px;padding:13px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.95rem;transition:.2s;}
+.modal-btn-play:hover{opacity:.9;transform:translateY(-1px);}
+.modal-btn-list{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.06);color:var(--text);border:1px solid var(--border2);border-radius:11px;padding:13px 20px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.95rem;font-weight:600;transition:.2s;}
+.modal-btn-list:hover{background:rgba(255,255,255,0.1);}
+
+/* PROFILE PAGE */
+.profile-page{display:none;padding:40px;}
+.profile-page.active{display:block;}
+.profile-banner{background:linear-gradient(135deg,var(--card),var(--card2));border:1px solid var(--border);border-radius:20px;padding:36px;display:flex;align-items:center;gap:28px;margin-bottom:32px;}
+.profile-big-avatar{width:96px;height:96px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:700;color:#000;overflow:hidden;flex-shrink:0;border:3px solid rgba(245,166,35,0.4);}
+.profile-big-avatar img{width:100%;height:100%;object-fit:cover;}
+.profile-info{flex:1;}
+.profile-display-name{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:1px;margin-bottom:4px;}
+.profile-meta-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.profile-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:99px;font-size:.78rem;font-weight:700;}
+.badge-free{background:rgba(255,255,255,0.08);border:1px solid var(--border2);color:var(--muted2);}
+.badge-pro{background:linear-gradient(135deg,rgba(245,166,35,0.2),rgba(232,54,93,0.2));border:1px solid rgba(245,166,35,0.35);color:var(--accent);}
+.badge-premium{background:linear-gradient(135deg,rgba(124,58,237,0.2),rgba(0,245,255,0.1));border:1px solid rgba(124,58,237,0.35);color:#a78bfa;}
+.profile-edit-btn{background:rgba(255,255,255,0.06);border:1px solid var(--border2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:600;padding:10px 20px;border-radius:10px;cursor:pointer;transition:.2s;margin-left:auto;}
+.profile-edit-btn:hover{background:rgba(255,255,255,0.1);}
+.profile-stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-bottom:32px;}
+.profile-stat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;text-align:center;}
+.profile-stat-val{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:1px;color:var(--accent);margin-bottom:4px;}
+.profile-stat-label{font-size:.78rem;color:var(--muted);}
+.watchlist-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;}
+
+/* EMPTY */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:100px 20px;color:var(--muted);text-align:center;gap:12px;}
+.empty p{font-size:1.1rem;}
+.empty small{font-size:.85rem;}
+
+/* SKELETONS */
+.skel-card{background:var(--card);border-radius:14px;overflow:hidden;border:1px solid var(--border);}
+.skel-thumb{width:100%;aspect-ratio:16/10;background:linear-gradient(90deg,#111120 25%,#1a1a30 50%,#111120 75%);background-size:200% 100%;animation:shimmer 1.6s ease infinite;}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.skel-line{height:12px;border-radius:6px;margin:12px 14px 5px;background:#1a1a30;}
+.skel-line.short{width:55%;margin-top:4px;}
+
+/* TOAST */
+#siteToast{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:14px 20px;font-size:.9rem;font-weight:500;z-index:9000;transform:translateY(100px);transition:transform .3s;pointer-events:none;}
+
+/* FOOTER */
+footer{padding:50px 40px;border-top:1px solid var(--border);margin-top:30px;}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;margin-bottom:40px;}
+.footer-logo{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:3px;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:12px;}
+.footer-desc{color:var(--muted);font-size:.85rem;line-height:1.7;max-width:280px;}
+.footer-head{font-weight:600;font-size:.87rem;color:var(--text);margin-bottom:14px;letter-spacing:.3px;}
+.footer-links{display:flex;flex-direction:column;gap:10px;}
+.footer-links a{color:var(--muted);font-size:.83rem;text-decoration:none;transition:.2s;cursor:pointer;}
+.footer-links a:hover{color:var(--text);}
+.footer-bottom{display:flex;align-items:center;justify-content:space-between;padding-top:24px;border-top:1px solid var(--border);color:var(--muted);font-size:.8rem;}
+.footer-badges{display:flex;gap:10px;}
+.f-badge{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:6px;padding:4px 12px;font-size:.75rem;color:var(--muted2);}
+
+/* RESPONSIVE */
+@media(max-width:900px){.footer-grid{grid-template-columns:1fr 1fr;}.nav-main{display:none;}.hero-arrows{display:none;}}
+@media(max-width:640px){nav{padding:0 16px;}.slide-content{padding:0 20px 80px;}.section{padding:12px 16px 28px;}.cat-section{padding:16px 16px 4px;}.cards-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;}.footer-grid{grid-template-columns:1fr;}.scroll-hint{left:20px;}.hero-nav{right:20px;}.plans-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div id="siteToast"></div>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-orbs"><div class="loader-orb"></div><div class="loader-orb"></div><div class="loader-orb"></div></div>
+  <div class="loader-logo">🍿 POPCORN</div>
+  <div class="loader-bar-wrap"><div class="loader-bar"></div></div>
+  <div class="loader-text" id="loaderText">Curating your experience...</div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="logo" onclick="showHome()">🍿 POPCORN</div>
+  <div class="nav-main">
+    <div class="nav-item">
+      <button class="nav-btn active" id="homeNavBtn" onclick="showHome();setNavActive(this)">Home</button>
+    </div>
+    <div class="nav-item">
+      <button class="nav-btn">Movies <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6,9 12,15 18,9"/></svg></button>
+      <div class="nav-dropdown">
+        <div class="dropdown-grid">
+          <div class="dd-item" onclick="goCategory('Action')"><div class="dd-icon" style="background:rgba(232,54,93,0.15)">⚡</div><div><div class="dd-label">Action</div><div class="dd-sub">High octane films</div></div></div>
+          <div class="dd-item" onclick="goCategory('Thriller')"><div class="dd-icon" style="background:rgba(124,58,237,0.15)">🔪</div><div><div class="dd-label">Thriller</div><div class="dd-sub">Edge of your seat</div></div></div>
+          <div class="dd-item" onclick="goCategory('Horror')"><div class="dd-icon" style="background:rgba(0,245,255,0.1)">👻</div><div><div class="dd-label">Horror</div><div class="dd-sub">Fear the unknown</div></div></div>
+          <div class="dd-item" onclick="goCategory('Drama')"><div class="dd-icon" style="background:rgba(245,166,35,0.15)">🎭</div><div><div class="dd-label">Drama</div><div class="dd-sub">Emotional stories</div></div></div>
+          <div class="dd-item" onclick="goCategory('Romance')"><div class="dd-icon" style="background:rgba(232,54,93,0.12)">❤️</div><div><div class="dd-label">Romance</div><div class="dd-sub">Love stories</div></div></div>
+          <div class="dd-item" onclick="goCategory('Comedy')"><div class="dd-icon" style="background:rgba(245,166,35,0.12)">😂</div><div><div class="dd-label">Comedy</div><div class="dd-sub">Laugh out loud</div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item">
+      <button class="nav-btn">Genres <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6,9 12,15 18,9"/></svg></button>
+      <div class="nav-dropdown">
+        <div class="dropdown-grid">
+          <div class="dd-item" onclick="goCategory('Animation')"><div class="dd-icon" style="background:rgba(0,245,255,0.1)">🎨</div><div><div class="dd-label">Animation</div></div></div>
+          <div class="dd-item" onclick="goCategory('Documentary')"><div class="dd-icon" style="background:rgba(245,166,35,0.12)">📹</div><div><div class="dd-label">Documentary</div></div></div>
+          <div class="dd-item" onclick="goCategory('Sci-Fi')"><div class="dd-icon" style="background:rgba(124,58,237,0.15)">🚀</div><div><div class="dd-label">Sci-Fi</div></div></div>
+          <div class="dd-item" onclick="goCategory('Fantasy')"><div class="dd-icon" style="background:rgba(168,85,247,0.15)">🧙</div><div><div class="dd-label">Fantasy</div></div></div>
+          <div class="dd-item" onclick="goCategory('Mystery')"><div class="dd-icon" style="background:rgba(0,245,255,0.08)">🔍</div><div><div class="dd-label">Mystery</div></div></div>
+          <div class="dd-item" onclick="goCategory('Adventure')"><div class="dd-icon" style="background:rgba(245,166,35,0.12)">🗺️</div><div><div class="dd-label">Adventure</div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item">
+      <button class="nav-btn" onclick="requireAuth(showProfile)">My List</button>
+    </div>
+  </div>
+  <div class="nav-right">
+    <div class="search-wrap">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" placeholder="Search titles..." id="searchInput" oninput="handleSearch()"/>
+    </div>
+    <button class="nav-icon-btn" title="Notifications" onclick="requireAuth(()=>{showToastMsg('🔔 No new notifications');})">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <div class="notif-dot"></div>
+    </button>
+    <!-- Signed out -->
+    <button id="signInNavBtn" onclick="openAuthModal()" style="background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000;font-weight:700;border:none;border-radius:10px;padding:8px 18px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.83rem;transition:.2s;">Sign In</button>
+    <!-- Signed in -->
+    <div class="profile-btn" id="profileNavBtn" style="display:none;" onclick="toggleProfileDropdown(event)">
+      <div class="profile-avatar" id="navAvatar">?</div>
+      <span class="profile-name" id="navName">User</span>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6,9 12,15 18,9"/></svg>
+      <div class="profile-dropdown" id="profileDropdown">
+        <div class="profile-header">
+          <div style="font-weight:600;font-size:.9rem;" id="dropName">User</div>
+          <div class="profile-email" id="dropEmail"></div>
+          <div class="profile-tier" id="dropTier">⭐ Free Plan</div>
+        </div>
+        <div class="pd-item" onclick="requireAuth(showProfile)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          My Profile
+        </div>
+        <div class="pd-item" onclick="openUpgradeModal()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+          Upgrade Plan
+        </div>
+        <div class="pd-divider"></div>
+        <div class="pd-item danger" onclick="doSignOut()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sign Out
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero" id="homeView">
+  <div class="hero-slides" id="heroSlides"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-arrows">
+    <button class="hero-arr" onclick="prevSlide()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18,15 12,9 6,15"/></svg></button>
+    <button class="hero-arr" onclick="nextSlide()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6,9 12,15 18,9"/></svg></button>
+  </div>
+  <div class="scroll-hint">
+    <div class="scroll-wheel"></div>
+    <span>Scroll to explore</span>
+  </div>
+  <div class="hero-nav" id="heroNav"></div>
+</div>
+
+<!-- CATEGORY PILLS -->
+<div class="cat-section" id="catSection">
+  <div class="cat-pill active" onclick="filterCategory('all',this)">🎬 All Titles</div>
+  <div class="cat-pill" onclick="filterCategory('Action',this)">⚡ Action</div>
+  <div class="cat-pill" onclick="filterCategory('Comedy',this)">😂 Comedy</div>
+  <div class="cat-pill" onclick="filterCategory('Drama',this)">🎭 Drama</div>
+  <div class="cat-pill" onclick="filterCategory('Horror',this)">👻 Horror</div>
+  <div class="cat-pill" onclick="filterCategory('Documentary',this)">📹 Docs</div>
+  <div class="cat-pill" onclick="filterCategory('Romance',this)">❤️ Romance</div>
+  <div class="cat-pill" onclick="filterCategory('Thriller',this)">🔪 Thriller</div>
+  <div class="cat-pill" onclick="filterCategory('Animation',this)">🎨 Animation</div>
+  <div class="cat-pill" onclick="filterCategory('Sci-Fi',this)">🚀 Sci-Fi</div>
+  <div class="cat-pill" onclick="filterCategory('Fantasy',this)">🧙 Fantasy</div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div id="mainContent"></div>
+
+<!-- PROFILE PAGE -->
+<div class="profile-page" id="profilePage">
+  <div class="profile-banner">
+    <div class="profile-big-avatar" id="profileBigAvatar">?</div>
+    <div class="profile-info">
+      <div class="profile-display-name" id="profileDisplayName">User</div>
+      <div class="profile-meta-row">
+        <div class="profile-email" id="profileEmailDisplay" style="color:var(--muted);font-size:.85rem;"></div>
+        <div class="profile-badge badge-free" id="profileTierBadge">Free Plan</div>
+      </div>
+    </div>
+    <button class="profile-edit-btn" onclick="openUpgradeModal()">⭐ Upgrade Plan</button>
+  </div>
+  <div class="profile-stats-row">
+    <div class="profile-stat"><div class="profile-stat-val" id="watchlistCount">0</div><div class="profile-stat-label">Watchlist</div></div>
+    <div class="profile-stat"><div class="profile-stat-val" id="watchedCount">0</div><div class="profile-stat-label">Watched</div></div>
+    <div class="profile-stat"><div class="profile-stat-val" id="planLabel">Free</div><div class="profile-stat-label">Current Plan</div></div>
+    <div class="profile-stat"><div class="profile-stat-val">🌍</div><div class="profile-stat-label">Global Access</div></div>
+  </div>
+  <div class="sec-header">
+    <div class="sec-title">❤️ <span class="accent">My</span> Watchlist<div class="sec-line"></div></div>
+  </div>
+  <div class="watchlist-grid" id="watchlistGrid">
+    <div class="empty"><p>Your watchlist is empty</p><small>Add movies by clicking the + button in any movie.</small></div>
+  </div>
+</div>
+
+<!-- AD PLAYER -->
+<div class="ad-player-overlay" id="adOverlay">
+  <div class="ad-container">
+    <div class="ad-video-wrap">
+      <video id="adVideo" playsinline></video>
+      <div class="ad-top-bar">
+        <div class="ad-label">Advertisement</div>
+        <button class="ad-skip-countdown" id="adSkipBtn" onclick="skipAd()">Skip in <span id="adCountdown">5</span>s</button>
+      </div>
+    </div>
+    <div class="ad-progress-bar"><div class="ad-progress-fill" id="adProgressFill" style="width:0%"></div></div>
+    <div class="ad-bottom-bar">
+      <div>
+        <div class="ad-brand" id="adBrand">Sponsor</div>
+        <div class="ad-info" id="adInfo">Advertisement</div>
+      </div>
+      <div style="color:var(--muted);font-size:.8rem;" id="adTimeLeft"></div>
+    </div>
+  </div>
+</div>
+
+<!-- VIDEO MODAL -->
+<div class="modal-wrap" id="modalWrap" onclick="closeModalOnBg(event)">
+  <div class="modal" id="modalBox">
+    <div class="modal-vid"><video id="modalVideo" controls playsinline></video></div>
+    <div class="modal-body">
+      <div class="modal-top">
+        <div class="modal-title" id="modalTitle"></div>
+        <button class="modal-x" onclick="closeModalBtn()">✕</button>
+      </div>
+      <div class="modal-tags" id="modalTags"></div>
+      <div class="modal-desc" id="modalDesc"></div>
+      <div class="modal-actions">
+        <button class="modal-btn-play" onclick="document.getElementById('modalVideo').play()">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+          Play Now
+        </button>
+        <button class="modal-btn-list" id="watchlistToggleBtn" onclick="toggleWatchlist()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add to List
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AUTH MODAL -->
+<div class="auth-modal-wrap" id="authModal" onclick="closeAuthOnBg(event)">
+  <div class="auth-modal">
+    <div class="auth-strip"></div>
+    <div class="auth-inner">
+      <button class="auth-x" onclick="closeAuthModal()">✕</button>
+      <div class="auth-logo">🍿 POPCORN</div>
+      <div class="auth-tagline">Your personal streaming universe</div>
+
+      <!-- STEP 1: Choose Provider -->
+      <div class="auth-step active" id="authStep1">
+        <div class="auth-tabs">
+          <div class="auth-tab active" id="tabSignIn" onclick="switchAuthTab('in')">Sign In</div>
+          <div class="auth-tab" id="tabSignUp" onclick="switchAuthTab('up')">Create Account</div>
+        </div>
+        <div class="auth-error" id="authError1"></div>
+        <div class="provider-btns">
+          <button class="provider-btn google-btn" onclick="signInWithGoogle()" id="googleBtn">
+            <div class="provider-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            </div>
+            <span class="provider-label" id="googleLabel">Continue with Google</span>
+            <div class="btn-spinner" id="googleSpinner"></div>
+          </button>
+          <button class="provider-btn apple-btn" onclick="signInWithApple()" id="appleBtn">
+            <div class="provider-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+            </div>
+            <span class="provider-label" id="appleLabel">Continue with Apple</span>
+            <div class="btn-spinner" id="appleSpinner" style="border-color:rgba(255,255,255,0.25);border-top-color:#fff;"></div>
+          </button>
+        </div>
+        <div class="auth-divider">or use email</div>
+        <button class="provider-btn email-btn" onclick="goEmailStep()">
+          <div class="provider-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          </div>
+          <span class="provider-label" id="emailBtnLabel">Continue with Email</span>
+        </button>
+        <div class="auth-note">By continuing you agree to our <a href="#">Terms</a> &amp; <a href="#">Privacy Policy</a>.</div>
+      </div>
+
+      <!-- STEP 2: Email / Password -->
+      <div class="auth-step" id="authStep2">
+        <button class="auth-back-btn" onclick="goStep(1)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg>
+          Back
+        </button>
+        <div class="auth-error" id="authError2"></div>
+        <div class="auth-success" id="authSuccess2"></div>
+        <!-- SIGN IN FORM -->
+        <div id="signInForm">
+          <div class="auth-field">
+            <label>Email Address</label>
+            <input class="auth-input" type="email" id="siEmail" placeholder="your@email.com" autocomplete="email"/>
+          </div>
+          <div class="auth-field">
+            <label>Password</label>
+            <div class="auth-input-wrap">
+              <input class="auth-input" type="password" id="siPassword" placeholder="Enter your password" autocomplete="current-password"/>
+              <button class="toggle-pw" type="button" onclick="togglePw('siPassword',this)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="auth-forgot"><a onclick="goForgotStep()">Forgot password?</a></div>
+          <button class="auth-submit-btn" id="signInBtn" onclick="doEmailSignIn()">
+            <div class="btn-spinner" id="siSpinner" style="border-color:rgba(0,0,0,0.2);border-top-color:#000;"></div>
+            <span id="siText">Sign In</span>
+          </button>
+        </div>
+        <!-- SIGN UP FORM -->
+        <div id="signUpForm" style="display:none;">
+          <div class="auth-field">
+            <label>Full Name</label>
+            <input class="auth-input" type="text" id="suName" placeholder="Your full name" autocomplete="name"/>
+          </div>
+          <div class="auth-field">
+            <label>Email Address</label>
+            <input class="auth-input" type="email" id="suEmail" placeholder="your@email.com" autocomplete="email"/>
+          </div>
+          <div class="auth-field">
+            <label>Password</label>
+            <div class="auth-input-wrap">
+              <input class="auth-input" type="password" id="suPassword" placeholder="Create a strong password" autocomplete="new-password" oninput="checkPwStrength(this.value)"/>
+              <button class="toggle-pw" type="button" onclick="togglePw('suPassword',this)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+            <div class="pw-strength" id="pwStrength" style="display:none;">
+              <div class="pw-strength-bar"><div class="pw-seg" id="ps1"></div><div class="pw-seg" id="ps2"></div><div class="pw-seg" id="ps3"></div><div class="pw-seg" id="ps4"></div></div>
+              <div class="pw-strength-text" id="pwStrengthText"></div>
+            </div>
+          </div>
+          <div class="auth-field">
+            <label>Confirm Password</label>
+            <div class="auth-input-wrap">
+              <input class="auth-input" type="password" id="suConfirm" placeholder="Repeat your password" autocomplete="new-password"/>
+              <button class="toggle-pw" type="button" onclick="togglePw('suConfirm',this)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+          </div>
+          <button class="auth-submit-btn" id="signUpBtn" onclick="doEmailSignUp()">
+            <div class="btn-spinner" id="suSpinner" style="border-color:rgba(0,0,0,0.2);border-top-color:#000;"></div>
+            <span id="suText">Create Account</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 3: Forgot Password -->
+      <div class="auth-step" id="authStep3">
+        <button class="auth-back-btn" onclick="authMode='in';goEmailStep()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg>
+          Back
+        </button>
+        <div style="margin-bottom:16px;">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:1px;margin-bottom:6px;">Reset Password</div>
+          <div style="color:var(--muted);font-size:.85rem;">Enter your email and we'll send a reset link.</div>
+        </div>
+        <div class="auth-error" id="authError3"></div>
+        <div class="auth-success" id="authSuccess3"></div>
+        <div class="auth-field">
+          <label>Email Address</label>
+          <input class="auth-input" type="email" id="fpEmail" placeholder="your@email.com"/>
+        </div>
+        <button class="auth-submit-btn" id="fpBtn" onclick="doPasswordReset()">
+          <div class="btn-spinner" id="fpSpinner" style="border-color:rgba(0,0,0,0.2);border-top-color:#000;"></div>
+          <span id="fpText">Send Reset Link</span>
+        </button>
+      </div>
+
+      <!-- STEP 4: Email Verification Sent -->
+      <div class="auth-step" id="authStep4">
+        <div class="auth-verify-icon">📬</div>
+        <div class="auth-verify-title">Check Your Inbox</div>
+        <div class="auth-verify-desc">
+          We sent a verification email to<br/>
+          <span class="auth-verify-email" id="verifyEmailDisplay"></span><br/><br/>
+          Click the link in that email to activate your account, then sign in below.
+        </div>
+        <button class="auth-resend-btn" onclick="resendVerification()">Resend Verification Email</button>
+        <button class="auth-submit-btn" style="margin-top:10px;" onclick="authMode='in';goEmailStep()">Back to Sign In</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- UPGRADE MODAL -->
+<div class="auth-modal-wrap" id="upgradeModal" onclick="closeUpgradeOnBg(event)">
+  <div class="auth-modal upgrade-modal" style="padding:32px;position:relative;">
+    <button class="auth-x" onclick="closeUpgradeModal()">✕</button>
+    <div class="upgrade-hero">
+      <div style="font-size:2rem;margin-bottom:8px;">🍿</div>
+      <div class="upgrade-hero-title">Choose Your Plan</div>
+      <div style="color:var(--muted2);font-size:.88rem;margin-top:6px;">Unlock the full PopCorn experience</div>
+    </div>
+    <div class="plans-grid">
+      <div class="plan-card" id="planFree" onclick="selectPlan('free')">
+        <div class="plan-name">Free</div>
+        <div class="plan-price">$0</div>
+        <div class="plan-period">forever</div>
+        <div class="plan-features">
+          <div class="plan-feature">Limited library</div>
+          <div class="plan-feature">HD quality</div>
+          <div class="plan-feature">Ads included</div>
+          <div class="plan-feature">1 device</div>
+        </div>
+      </div>
+      <div class="plan-card featured" id="planPro" onclick="selectPlan('pro')">
+        <div class="plan-badge">MOST POPULAR</div>
+        <div class="plan-name">Pro</div>
+        <div class="plan-price">$6.99</div>
+        <div class="plan-period">per month</div>
+        <div class="plan-features">
+          <div class="plan-feature">Full library</div>
+          <div class="plan-feature">Full HD 1080p</div>
+          <div class="plan-feature">No ads</div>
+          <div class="plan-feature">3 devices</div>
+          <div class="plan-feature">Downloads</div>
+        </div>
+      </div>
+      <div class="plan-card" id="planPremium" onclick="selectPlan('premium')">
+        <div class="plan-name">Premium</div>
+        <div class="plan-price">$12.99</div>
+        <div class="plan-period">per month</div>
+        <div class="plan-features">
+          <div class="plan-feature">Full library</div>
+          <div class="plan-feature">4K Ultra HD</div>
+          <div class="plan-feature">No ads ever</div>
+          <div class="plan-feature">6 devices</div>
+          <div class="plan-feature">Early access</div>
+          <div class="plan-feature">Priority support</div>
+        </div>
+      </div>
+    </div>
+    <button class="btn-upgrade" onclick="processPlanUpgrade()">Get Started — Cancel Anytime</button>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer id="siteFooter">
+  <div class="footer-grid">
+    <div>
+      <div class="footer-logo">🍿 POPCORN</div>
+      <p class="footer-desc">Stream short films, indie gems, and curated content. All in one place. No ads on Pro &amp; Premium.</p>
+    </div>
+    <div>
+      <div class="footer-head">Browse</div>
+      <div class="footer-links">
+        <a href="#">New Releases</a><a href="#">Trending Now</a><a href="#">Top Rated</a><a href="#" onclick="requireAuth(showProfile)">My List</a>
+      </div>
+    </div>
+    <div>
+      <div class="footer-head">Genres</div>
+      <div class="footer-links">
+        <a onclick="goCategory('Action')">Action</a>
+        <a onclick="goCategory('Drama')">Drama</a>
+        <a onclick="goCategory('Comedy')">Comedy</a>
+        <a onclick="goCategory('Horror')">Horror</a>
+        <a onclick="goCategory('Documentary')">Documentary</a>
+      </div>
+    </div>
+    <div>
+      <div class="footer-head">Support</div>
+      <div class="footer-links">
+        <a href="#">Help Center</a><a href="#">Privacy Policy</a><a href="#">Terms of Use</a>
+        <a href="admin.html">Admin Panel</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 PopCorn. Built with Firebase &amp; Cloudinary.</span>
+    <div class="footer-badges"><span class="f-badge">4K Ultra HD</span><span class="f-badge">No Ads on Pro</span><span class="f-badge">Indie First</span></div>
+  </div>
+</footer>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore, collection, getDocs, query, orderBy,
+  doc, setDoc, getDoc, updateDoc, arrayUnion, arrayRemove
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import {
+  getAuth, GoogleAuthProvider, OAuthProvider,
+  signInWithPopup, signInWithRedirect, getRedirectResult,
+  signInWithEmailAndPassword, createUserWithEmailAndPassword,
+  sendPasswordResetEmail, sendEmailVerification,
+  updateProfile, signOut as fbSignOut, onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+// ─── FIREBASE INIT ────────────────────────────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyABdKh8LYCGNkpuJ_OvW4ciYd0OLoe8DBw",
+  authDomain: "pop-corn-c4918.firebaseapp.com",
+  projectId: "pop-corn-c4918",
+  storageBucket: "pop-corn-c4918.firebasestorage.app",
+  messagingSenderId: "721578587416",
+  appId: "1:721578587416:web:47f27eb996b78730675a6d",
+  measurementId: "G-34CS0S1T7Y"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({ prompt: 'select_account' });
+const appleProvider = new OAuthProvider('apple.com');
+appleProvider.addScope('email');
+appleProvider.addScope('name');
+
+// ─── STATE ────────────────────────────────────────────────────────
+let allVideos = [];
+let allAds = [];
+let currentCategory = 'all';
+let searchQuery = '';
+let heroIdx = 0;
+let heroTimer = null;
+let currentUser = null;
+let userProfile = null;
+let currentModalVideoId = null;
+let adCountdownTimer = null;
+let pendingAction = null;
+let selectedPlan = 'pro';
+let authMode = 'in';
+let lastCreatedUserEmail = '';
+let lastCreatedUserObj = null;
+let adAfterCallback = null;
+let profileDropdownOpen = false;
+
+// ─── LOADER ───────────────────────────────────────────────────────
+const loadingTexts = ['Curating your experience...','Fetching indie gems...','Loading the magic...','Almost there...'];
+let ltIdx = 0;
+const ltEl = document.getElementById('loaderText');
+const ltInterval = setInterval(() => {
+  ltIdx = (ltIdx + 1) % loadingTexts.length;
+  ltEl.textContent = loadingTexts[ltIdx];
+}, 800);
+function hideLoader() {
+  clearInterval(ltInterval);
+  setTimeout(() => document.getElementById('loader').classList.add('hidden'), 300);
+}
+
+// ─── HANDLE REDIRECT RESULT (for popup-blocked fallback) ─────────
+getRedirectResult(auth).then(result => {
+  // onAuthStateChanged handles everything else
+}).catch(e => {
+  if (e.code && !['auth/no-auth-event','auth/null-user'].includes(e.code)) {
+    console.warn('Redirect result:', e.code);
+  }
+});
+
+// ─── AUTH STATE LISTENER ──────────────────────────────────────────
+onAuthStateChanged(auth, async (user) => {
+  currentUser = user;
+  if (user) {
+    // For social providers, emailVerified may be false initially but user is valid
+    const isSocialUser = user.providerData.some(p => p.providerId !== 'password');
+    const isVerified = user.emailVerified || isSocialUser;
+
+    if (!isVerified) {
+      // Unverified email/password user — do NOT close modal, do NOT sign in
+      return;
+    }
+
+    // Close auth modal for all valid sign-ins
+    const authModal = document.getElementById('authModal');
+    if (authModal && authModal.classList.contains('open')) {
+      closeAuthModal();
+    }
+
+    // Load/create Firestore profile
+    try {
+      const ref = doc(db, 'users', user.uid);
+      const snap = await getDoc(ref);
+      if (!snap.exists()) {
+        userProfile = {
+          uid: user.uid,
+          displayName: user.displayName || 'User',
+          email: user.email || '',
+          photoURL: user.photoURL || '',
+          plan: 'free',
+          watchlist: [],
+          watchedCount: 0,
+          createdAt: new Date().toISOString()
+        };
+        await setDoc(ref, userProfile);
+      } else {
+        userProfile = snap.data();
+      }
+    } catch (e) {
+      console.error('Firestore profile error:', e);
+      userProfile = {
+        uid: user.uid,
+        displayName: user.displayName || 'User',
+        email: user.email || '',
+        plan: 'free',
+        watchlist: [],
+        watchedCount: 0
+      };
+    }
+
+    updateAuthUI(user);
+    showToastMsg('👋 Welcome back, ' + (user.displayName || 'there') + '!');
+
+    if (pendingAction) {
+      const fn = pendingAction;
+      pendingAction = null;
+      fn();
+    }
+  } else {
+    updateAuthUI(null);
+  }
+});
+
+// ─── AUTH UI ──────────────────────────────────────────────────────
+function updateAuthUI(user) {
+  const signInBtn = document.getElementById('signInNavBtn');
+  const profileBtn = document.getElementById('profileNavBtn');
+  if (user) {
+    signInBtn.style.display = 'none';
+    profileBtn.style.display = 'flex';
+    const name = user.displayName || 'User';
+    const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    const avatarEl = document.getElementById('navAvatar');
+    if (user.photoURL) {
+      avatarEl.innerHTML = `<img src="${user.photoURL}" alt="" referrerpolicy="no-referrer"/>`;
+    } else {
+      avatarEl.textContent = initials;
+    }
+    document.getElementById('navName').textContent = name.split(' ')[0];
+    document.getElementById('dropName').textContent = name;
+    document.getElementById('dropEmail').textContent = user.email || '';
+    updateProfileUI();
+  } else {
+    signInBtn.style.display = '';
+    profileBtn.style.display = 'none';
+    userProfile = null;
+  }
+}
+
+function updateProfileUI() {
+  if (!userProfile) return;
+  const plan = userProfile.plan || 'free';
+  const tierMap = { free: '⭐ Free Plan', pro: '🔥 Pro Plan', premium: '💎 Premium Plan' };
+  const el = document.getElementById('dropTier');
+  if (el) el.textContent = tierMap[plan];
+
+  const pd = document.getElementById('profileDisplayName');
+  if (pd) {
+    pd.textContent = userProfile.displayName || 'User';
+    document.getElementById('profileEmailDisplay').textContent = userProfile.email || '';
+    const badgeEl = document.getElementById('profileTierBadge');
+    badgeEl.textContent = tierMap[plan];
+    badgeEl.className = 'profile-badge ' + (plan === 'free' ? 'badge-free' : plan === 'pro' ? 'badge-pro' : 'badge-premium');
+    document.getElementById('planLabel').textContent = plan.charAt(0).toUpperCase() + plan.slice(1);
+    document.getElementById('watchlistCount').textContent = (userProfile.watchlist || []).length;
+    document.getElementById('watchedCount').textContent = userProfile.watchedCount || 0;
+    const bigAv = document.getElementById('profileBigAvatar');
+    if (currentUser?.photoURL) {
+      bigAv.innerHTML = `<img src="${currentUser.photoURL}" alt="" referrerpolicy="no-referrer"/>`;
+    } else {
+      bigAv.textContent = (userProfile.displayName || 'U').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    }
+    renderWatchlist();
+  }
+}
+
+async function updateUserProfile(data) {
+  if (!currentUser) return;
+  userProfile = { ...userProfile, ...data };
+  try {
+    await updateDoc(doc(db, 'users', currentUser.uid), data);
+  } catch (e) {
+    console.error('updateUserProfile error:', e);
+  }
+}
+
+// ─── PROFILE DROPDOWN (JS-controlled, fixes hover-only bug) ──────
+window.toggleProfileDropdown = function(e) {
+  e.stopPropagation();
+  const dd = document.getElementById('profileDropdown');
+  profileDropdownOpen = !profileDropdownOpen;
+  dd.classList.toggle('open', profileDropdownOpen);
+};
+document.addEventListener('click', () => {
+  if (profileDropdownOpen) {
+    profileDropdownOpen = false;
+    document.getElementById('profileDropdown')?.classList.remove('open');
+  }
+});
+
+// ─── AUTH MODAL HELPERS ───────────────────────────────────────────
+window.openAuthModal = function() {
+  authMode = 'in';
+  document.getElementById('tabSignIn').classList.add('active');
+  document.getElementById('tabSignUp').classList.remove('active');
+  document.getElementById('emailBtnLabel').textContent = 'Continue with Email';
+  document.getElementById('authModal').classList.add('open');
+  goStep(1);
+  clearAllForms();
+};
+window.closeAuthModal = function() {
+  document.getElementById('authModal').classList.remove('open');
+  clearAuthErrors();
+  resetProviderButtons();
+};
+window.closeAuthOnBg = function(e) {
+  if (e.target === document.getElementById('authModal')) closeAuthModal();
+};
+
+window.openUpgradeModal = function() {
+  document.getElementById('upgradeModal').classList.add('open');
+};
+window.closeUpgradeModal = function() {
+  document.getElementById('upgradeModal').classList.remove('open');
+};
+window.closeUpgradeOnBg = function(e) {
+  if (e.target === document.getElementById('upgradeModal')) closeUpgradeModal();
+};
+
+window.goStep = function(n) {
+  document.querySelectorAll('.auth-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('authStep' + n)?.classList.add('active');
+  clearAuthErrors();
+};
+window.goEmailStep = function() {
+  goStep(2);
+  document.getElementById('signInForm').style.display = authMode === 'up' ? 'none' : '';
+  document.getElementById('signUpForm').style.display = authMode === 'up' ? '' : 'none';
+};
+window.goForgotStep = function() {
+  const email = document.getElementById('siEmail')?.value || '';
+  document.getElementById('fpEmail').value = email;
+  goStep(3);
+};
+window.switchAuthTab = function(mode) {
+  authMode = mode;
+  document.getElementById('tabSignIn').classList.toggle('active', mode === 'in');
+  document.getElementById('tabSignUp').classList.toggle('active', mode === 'up');
+  document.getElementById('emailBtnLabel').textContent = mode === 'in' ? 'Continue with Email' : 'Sign Up with Email';
+};
+
+function clearAuthErrors() {
+  document.querySelectorAll('.auth-error, .auth-success').forEach(e => {
+    e.classList.remove('show');
+    e.textContent = '';
+  });
+}
+function clearAllForms() {
+  ['siEmail','siPassword','suName','suEmail','suPassword','suConfirm','fpEmail'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  const pwS = document.getElementById('pwStrength');
+  if (pwS) pwS.style.display = 'none';
+}
+function showAuthError(stepNum, msg) {
+  const el = document.getElementById('authError' + stepNum);
+  if (el) { el.textContent = msg; el.classList.add('show'); }
+}
+function showAuthSuccess(stepNum, msg) {
+  const el = document.getElementById('authSuccess' + stepNum);
+  if (el) { el.textContent = msg; el.classList.add('show'); }
+}
+function resetProviderButtons() {
+  ['google','apple'].forEach(p => {
+    const btn = document.getElementById(p + 'Btn');
+    const spinner = document.getElementById(p + 'Spinner');
+    if (btn) btn.disabled = false;
+    if (spinner) spinner.style.display = 'none';
+  });
+}
+function setProviderLoading(provider, on) {
+  const spinner = document.getElementById(provider + 'Spinner');
+  const btn = document.getElementById(provider + 'Btn');
+  if (spinner) spinner.style.display = on ? 'block' : 'none';
+  if (btn) btn.disabled = on;
+}
+
+// ─── FRIENDLY ERROR MESSAGES ──────────────────────────────────────
+function friendlyError(code) {
+  const map = {
+    'auth/user-not-found': 'No account found with that email.',
+    'auth/wrong-password': 'Incorrect password. Try again.',
+    'auth/invalid-credential': 'Email or password is incorrect.',
+    'auth/invalid-login-credentials': 'Email or password is incorrect.',
+    'auth/email-already-in-use': 'An account with this email already exists.',
+    'auth/weak-password': 'Password is too weak (min 6 characters).',
+    'auth/invalid-email': 'Please enter a valid email address.',
+    'auth/too-many-requests': 'Too many attempts. Please try again later.',
+    'auth/network-request-failed': 'Network error. Check your connection.',
+    'auth/popup-closed-by-user': 'Sign-in was cancelled.',
+    'auth/cancelled-popup-request': 'Sign-in was cancelled.',
+    'auth/popup-blocked': 'Popup blocked by your browser. Please allow popups for this site and try again.',
+    'auth/account-exists-with-different-credential': 'An account already exists with a different sign-in method.',
+    'auth/operation-not-allowed': 'This sign-in method is not enabled. Please use email/password.',
+    'auth/unauthorized-domain': 'This domain is not authorized. Please contact support.',
+    'auth/internal-error': 'An internal error occurred. Please try again.',
+    'auth/user-disabled': 'This account has been disabled.',
+  };
+  return map[code] || `Something went wrong (${code || 'unknown'}). Please try again.`;
+}
+
+// ─── SOCIAL SIGN-IN: GOOGLE ───────────────────────────────────────
+window.signInWithGoogle = async function() {
+  clearAuthErrors();
+  setProviderLoading('google', true);
+  document.getElementById('googleLabel').textContent = 'Signing in...';
+  try {
+    await signInWithPopup(auth, googleProvider);
+    // onAuthStateChanged handles the rest
+  } catch (e) {
+    const code = e.code || '';
+    if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+      // User cancelled — do nothing, just reset
+    } else if (code === 'auth/popup-blocked') {
+      showAuthError(1, 'Popup was blocked. Redirecting you now...');
+      setTimeout(() => signInWithRedirect(auth, googleProvider), 1200);
+    } else {
+      showAuthError(1, friendlyError(code));
+    }
+  } finally {
+    setProviderLoading('google', false);
+    document.getElementById('googleLabel').textContent = 'Continue with Google';
+  }
+};
+
+// ─── SOCIAL SIGN-IN: APPLE ────────────────────────────────────────
+window.signInWithApple = async function() {
+  clearAuthErrors();
+  setProviderLoading('apple', true);
+  document.getElementById('appleLabel').textContent = 'Signing in...';
+  try {
+    await signInWithPopup(auth, appleProvider);
+    // onAuthStateChanged handles the rest
+  } catch (e) {
+    const code = e.code || '';
+    if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+      // User cancelled — do nothing
+    } else if (code === 'auth/popup-blocked') {
+      showAuthError(1, 'Popup was blocked. Redirecting you now...');
+      setTimeout(() => signInWithRedirect(auth, appleProvider), 1200);
+    } else if (code === 'auth/operation-not-allowed') {
+      showAuthError(1, 'Apple sign-in is not enabled for this app. Please use Google or Email.');
+    } else {
+      showAuthError(1, friendlyError(code));
+    }
+  } finally {
+    setProviderLoading('apple', false);
+    document.getElementById('appleLabel').textContent = 'Continue with Apple';
+  }
+};
+
+// ─── EMAIL SIGN IN ────────────────────────────────────────────────
+window.doEmailSignIn = async function() {
+  clearAuthErrors();
+  const email = document.getElementById('siEmail').value.trim();
+  const password = document.getElementById('siPassword').value;
+  if (!email || !password) { showAuthError(2, 'Please fill in all fields.'); return; }
+
+  const btn = document.getElementById('signInBtn');
+  btn.disabled = true;
+  document.getElementById('siSpinner').style.display = 'block';
+  document.getElementById('siText').textContent = 'Signing in...';
+
+  try {
+    const cred = await signInWithEmailAndPassword(auth, email, password);
+    if (!cred.user.emailVerified) {
+      // Sign out — don't let unverified users in
+      await fbSignOut(auth);
+      lastCreatedUserObj = cred.user;
+      lastCreatedUserEmail = email;
+      document.getElementById('verifyEmailDisplay').textContent = email;
+      goStep(4);
+      return;
+    }
+    // Verified — onAuthStateChanged handles modal close + pendingAction
+  } catch (e) {
+    showAuthError(2, friendlyError(e.code));
+  } finally {
+    btn.disabled = false;
+    document.getElementById('siSpinner').style.display = 'none';
+    document.getElementById('siText').textContent = 'Sign In';
+  }
+};
+
+// Enter-key support on sign-in fields
+document.getElementById('siEmail')?.addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('siPassword').focus();
+});
+document.getElementById('siPassword')?.addEventListener('keydown', e => {
+  if (e.key === 'Enter') doEmailSignIn();
+});
+
+// ─── EMAIL SIGN UP ────────────────────────────────────────────────
+window.doEmailSignUp = async function() {
+  clearAuthErrors();
+  const name = document.getElementById('suName').value.trim();
+  const email = document.getElementById('suEmail').value.trim();
+  const pw = document.getElementById('suPassword').value;
+  const confirm = document.getElementById('suConfirm').value;
+
+  if (!name) { showAuthError(2, 'Please enter your name.'); return; }
+  if (!email) { showAuthError(2, 'Please enter your email.'); return; }
+  if (pw.length < 6) { showAuthError(2, 'Password must be at least 6 characters.'); return; }
+  if (pw !== confirm) { showAuthError(2, 'Passwords do not match.'); return; }
+
+  const btn = document.getElementById('signUpBtn');
+  btn.disabled = true;
+  document.getElementById('suSpinner').style.display = 'block';
+  document.getElementById('suText').textContent = 'Creating account...';
+
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, email, pw);
+    await updateProfile(cred.user, { displayName: name });
+    // Sign out immediately so unverified user isn't logged in
+    await fbSignOut(auth);
+    await sendEmailVerification(cred.user);
+    lastCreatedUserObj = cred.user;
+    lastCreatedUserEmail = email;
+    document.getElementById('verifyEmailDisplay').textContent = email;
+    goStep(4);
+  } catch (e) {
+    showAuthError(2, friendlyError(e.code));
+  } finally {
+    btn.disabled = false;
+    document.getElementById('suSpinner').style.display = 'none';
+    document.getElementById('suText').textContent = 'Create Account';
+  }
+};
+
+// ─── PASSWORD RESET ───────────────────────────────────────────────
+window.doPasswordReset = async function() {
+  clearAuthErrors();
+  const email = document.getElementById('fpEmail').value.trim();
+  if (!email) { showAuthError(3, 'Please enter your email.'); return; }
+
+  const btn = document.getElementById('fpBtn');
+  btn.disabled = true;
+  document.getElementById('fpSpinner').style.display = 'block';
+  document.getElementById('fpText').textContent = 'Sending...';
+
+  try {
+    await sendPasswordResetEmail(auth, email);
+    showAuthSuccess(3, '✓ Reset link sent! Check your inbox and spam folder.');
+  } catch (e) {
+    showAuthError(3, friendlyError(e.code));
+  } finally {
+    btn.disabled = false;
+    document.getElementById('fpSpinner').style.display = 'none';
+    document.getElementById('fpText').textContent = 'Send Reset Link';
+  }
+};
+
+// ─── RESEND VERIFICATION ──────────────────────────────────────────
+window.resendVerification = async function() {
+  try {
+    if (lastCreatedUserObj) {
+      await sendEmailVerification(lastCreatedUserObj);
+      showToastMsg('📬 Verification email resent!');
+    } else {
+      showToastMsg('⚠️ Please sign up again to resend.');
+    }
+  } catch (e) {
+    showToastMsg('⚠️ Could not resend. Try again shortly.');
+  }
+};
+
+// ─── SIGN OUT ────────────────────────────────────────────────────
+window.doSignOut = async function() {
+  try { await fbSignOut(auth); } catch (e) { console.error('Sign out error:', e); }
+  currentUser = null;
+  userProfile = null;
+  updateAuthUI(null);
+  showHome();
+  showToastMsg('👋 Signed out successfully.');
+};
+
+// ─── PASSWORD VISIBILITY TOGGLE ───────────────────────────────────
+window.togglePw = function(inputId, btn) {
+  const input = document.getElementById(inputId);
+  const isText = input.type === 'text';
+  input.type = isText ? 'password' : 'text';
+  btn.innerHTML = isText
+    ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`
+    : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
+};
+
+// ─── PASSWORD STRENGTH ────────────────────────────────────────────
+window.checkPwStrength = function(pw) {
+  const wrap = document.getElementById('pwStrength');
+  if (!pw) { wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+  let score = 0;
+  if (pw.length >= 8) score++;
+  if (/[A-Z]/.test(pw)) score++;
+  if (/[0-9]/.test(pw)) score++;
+  if (/[^A-Za-z0-9]/.test(pw)) score++;
+  const segs = ['ps1', 'ps2', 'ps3', 'ps4'];
+  const labels = ['', 'Weak — too short', 'Fair — add numbers', 'Good — add symbols', 'Strong ✓'];
+  segs.forEach((id, i) => {
+    const el = document.getElementById(id);
+    el.className = 'pw-seg';
+    if (i < score) el.classList.add(score <= 1 ? 'weak' : score <= 2 ? 'medium' : 'strong');
+  });
+  document.getElementById('pwStrengthText').textContent = labels[score] || '';
+};
+
+// ─── REQUIRE AUTH ─────────────────────────────────────────────────
+window.requireAuth = function(fn) {
+  if (currentUser) { fn(); }
+  else { pendingAction = fn; openAuthModal(); }
+};
+
+// ─── PLAN MANAGEMENT ─────────────────────────────────────────────
+window.selectPlan = function(p) {
+  selectedPlan = p;
+  ['free', 'pro', 'premium'].forEach(plan => {
+    document.getElementById('plan' + plan.charAt(0).toUpperCase() + plan.slice(1))?.classList.remove('featured');
+  });
+  const map = { free: 'planFree', pro: 'planPro', premium: 'planPremium' };
+  document.getElementById(map[p])?.classList.add('featured');
+};
+
+window.processPlanUpgrade = async function() {
+  if (!currentUser) { closeUpgradeModal(); openAuthModal(); return; }
+  if (selectedPlan === 'free') { closeUpgradeModal(); return; }
+  await updateUserProfile({ plan: selectedPlan });
+  closeUpgradeModal();
+  const name = selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1);
+  showToastMsg(`✅ Upgraded to ${name} plan!`);
+  updateProfileUI();
+};
+
+// ─── NAVIGATION ──────────────────────────────────────────────────
+window.setNavActive = function(el) {
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+};
+window.showHome = function() {
+  document.getElementById('homeView').style.display = '';
+  document.getElementById('catSection').style.display = '';
+  document.getElementById('mainContent').style.display = '';
+  document.getElementById('profilePage').classList.remove('active');
+  document.getElementById('siteFooter').style.display = '';
+  document.getElementById('homeNavBtn')?.classList.add('active');
+};
+window.showProfile = function() {
+  if (!currentUser) { openAuthModal(); return; }
+  document.getElementById('homeView').style.display = 'none';
+  document.getElementById('catSection').style.display = 'none';
+  document.getElementById('mainContent').style.display = 'none';
+  document.getElementById('siteFooter').style.display = 'none';
+  document.getElementById('profilePage').classList.add('active');
+  updateProfileUI();
+};
+window.goCategory = function(cat) {
+  showHome();
+  filterCategory(cat, null);
+  document.querySelectorAll('.cat-pill').forEach(p => {
+    p.classList.toggle('active', p.textContent.includes(cat));
+  });
+  setTimeout(() => document.getElementById('mainContent')?.scrollIntoView({ behavior: 'smooth' }), 100);
+};
+
+// ─── HERO SLIDER ──────────────────────────────────────────────────
+const heroSlideData = [
+  { eyebrow: '🔥 Trending Now', title: 'YOUR NEXT', accent: 'OBSESSION', sub: 'Awaits.', desc: 'Stream short films, indie gems, and curated content — all in one place.', tags: ['Free to Watch', '4K HDR', 'No Ads on Pro'], bg: 'linear-gradient(135deg,#0a0010 0%,#200030 50%,#0a1020 100%)' },
+  { eyebrow: '✨ New Release', title: 'DISCOVER THE', accent: 'UNSEEN', sub: 'World.', desc: 'Handpicked indie cinema waiting for their audience. Hidden masterpieces.', tags: ['Indie Films', 'Award Winning'], bg: 'linear-gradient(135deg,#001020 0%,#002030 50%,#000818 100%)' },
+  { eyebrow: '🎬 Editor\'s Pick', title: 'FEEL EVERY', accent: 'EMOTION', sub: 'Live.', desc: 'Drama, romance, and everything in between. Stories that stay with you.', tags: ['Drama', 'International'], bg: 'linear-gradient(135deg,#100010 0%,#200015 50%,#080018 100%)' },
+];
+
+function buildHero(videos) {
+  const container = document.getElementById('heroSlides');
+  const navEl = document.getElementById('heroNav');
+  container.innerHTML = '';
+  navEl.innerHTML = '';
+
+  heroSlideData.forEach((s, i) => {
+    const vid = videos[i] || null;
+    const div = document.createElement('div');
+    div.className = 'hero-slide' + (i === 0 ? ' active' : '');
+
+    const watchBtn = vid
+      ? `<button class="btn-play" data-videoid="${vid.id}"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>Watch Now</button>`
+      : `<button class="btn-play" onclick="document.querySelector('.section')?.scrollIntoView({behavior:'smooth'})"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>Browse Now</button>`;
+
+    div.innerHTML = `
+      <div class="slide-bg" style="background:${s.bg};${vid?.thumbnailUrl ? `background-image:url('${vid.thumbnailUrl}');background-size:cover;background-position:center;` : ''}"></div>
+      <div class="slide-gradient"></div>
+      <div class="slide-bottom"></div>
+      <div class="slide-content">
+        <div class="slide-eyebrow"><span></span>${s.eyebrow}</div>
+        <div class="slide-title">${s.title}<br/><span class="glow">${s.accent}</span><br/>${s.sub}</div>
+        <p class="slide-desc">${vid ? (vid.description || s.desc) : s.desc}</p>
+        <div class="slide-meta">${s.tags.map(t => `<span class="slide-tag">${t}</span>`).join('')}<div class="slide-rating">★ 9.${Math.floor(Math.random() * 3) + 1}</div></div>
+        <div class="hero-actions">
+          ${watchBtn}
+          <button class="btn-ghost" onclick="document.getElementById('mainContent')?.scrollIntoView({behavior:'smooth'})">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Explore More
+          </button>
+        </div>
+      </div>`;
+
+    container.appendChild(div);
+
+    // Attach play button event safely
+    if (vid) {
+      const btn = div.querySelector('.btn-play[data-videoid]');
+      if (btn) btn.addEventListener('click', () => openModal(vid.id));
+    }
+
+    const dot = document.createElement('div');
+    dot.className = 'hero-dot' + (i === 0 ? ' active' : '');
+    dot.addEventListener('click', () => goSlide(i));
+    navEl.appendChild(dot);
+  });
+
+  startHeroTimer();
+}
+
+function goSlide(idx) {
+  const slides = document.querySelectorAll('.hero-slide');
+  const dots = document.querySelectorAll('.hero-dot');
+  if (!slides.length) return;
+  slides[heroIdx]?.classList.remove('active');
+  dots[heroIdx]?.classList.remove('active');
+  heroIdx = ((idx % slides.length) + slides.length) % slides.length;
+  slides[heroIdx]?.classList.add('active');
+  dots[heroIdx]?.classList.add('active');
+}
+window.nextSlide = function() { clearTimeout(heroTimer); goSlide(heroIdx + 1); startHeroTimer(); };
+window.prevSlide = function() { clearTimeout(heroTimer); goSlide(heroIdx - 1); startHeroTimer(); };
+function startHeroTimer() {
+  clearTimeout(heroTimer);
+  heroTimer = setTimeout(() => { goSlide(heroIdx + 1); startHeroTimer(); }, 6000);
+}
+
+// ─── DATA LOADING ────────────────────────────────────────────────
+async function loadVideos() {
+  showSkeletons();
+  try {
+    const q = query(collection(db, 'videos'), orderBy('createdAt', 'desc'));
+    const snap = await getDocs(q);
+    allVideos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch (e) {
+    console.error('Videos load error:', e);
+    allVideos = [];
+  }
+  try {
+    const aq = query(collection(db, 'advertisements'), orderBy('createdAt', 'desc'));
+    const asnap = await getDocs(aq);
+    allAds = asnap.docs.map(d => ({ id: d.id, ...d.data() })).filter(a => a.isActive !== false);
+  } catch (e) {
+    console.error('Ads load error:', e);
+    allAds = [];
+  }
+  buildHero(allVideos);
+  renderContent();
+  hideLoader();
+}
+
+function showSkeletons() {
+  const c = document.getElementById('mainContent');
+  const row = Array(6).fill(`<div class="skel-card"><div class="skel-thumb"></div><div class="skel-line"></div><div class="skel-line short"></div></div>`).join('');
+  c.innerHTML = `<div class="section"><div class="sec-header"><div class="sec-title">Loading...</div></div><div class="cards-grid">${row}</div></div>`;
+}
+
+// ─── FILTERING ───────────────────────────────────────────────────
+window.filterCategory = function(cat, el) {
+  currentCategory = cat;
+  searchQuery = '';
+  document.getElementById('searchInput').value = '';
+  if (el) {
+    document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+  }
+  renderContent();
+};
+window.handleSearch = function() {
+  searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
+  currentCategory = 'all';
+  document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+  document.querySelector('.cat-pill')?.classList.add('active');
+  renderContent();
+};
+
+function getFiltered() {
+  return allVideos.filter(v => {
+    const mc = currentCategory === 'all' || v.category === currentCategory;
+    const ms = !searchQuery || (v.title || '').toLowerCase().includes(searchQuery) || (v.description || '').toLowerCase().includes(searchQuery);
+    return mc && ms;
+  });
+}
+
+const catIcons = { Action:'⚡',Comedy:'😂',Drama:'🎭',Horror:'👻',Documentary:'📹',Romance:'❤️',Thriller:'🔪',Animation:'🎨','Sci-Fi':'🚀',Fantasy:'🧙',Mystery:'🔍',Adventure:'🗺️',Uncategorized:'🎬' };
+
+function renderContent() {
+  const filtered = getFiltered();
+  const c = document.getElementById('mainContent');
+  if (!filtered.length) {
+    c.innerHTML = `<div class="empty"><svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><p>No titles found</p><small>Try a different genre or add content via Admin panel.</small></div>`;
+    return;
+  }
+  if (currentCategory === 'all' && !searchQuery) {
+    const groups = {};
+    filtered.forEach(v => {
+      const cat = v.category || 'Uncategorized';
+      if (!groups[cat]) groups[cat] = [];
+      groups[cat].push(v);
+    });
+    let html = `<div class="section" id="content-top">
+      <div class="sec-header"><div class="sec-title">🔥 <span class="accent">Featured</span> Now<div class="sec-line"></div></div></div>
+      <div class="featured-strip">${filtered.slice(0, 3).map(featCard).join('')}</div>
+    </div>`;
+    html += `<div class="section">
+      <div class="sec-header">
+        <div class="sec-title">✨ <span class="accent">New</span> Releases<div class="sec-line"></div></div>
+        <button class="see-all-btn">See All <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,18 15,12 9,6"/></svg></button>
+      </div>
+      <div class="cards-grid">${filtered.slice(0, 6).map(v => videoCard(v, true)).join('')}</div>
+    </div>`;
+    Object.entries(groups).forEach(([cat, vids]) => {
+      html += `<div class="section">
+        <div class="sec-header">
+          <div class="sec-title">${catIcons[cat] || '🎬'} <span class="accent">${cat}</span><div class="sec-line"></div></div>
+          <button class="see-all-btn" onclick="goCategory('${cat}')">All ${cat} (${vids.length}) <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,18 15,12 9,6"/></svg></button>
+        </div>
+        <div class="h-scroll">${vids.slice(0, 10).map(v => videoCard(v)).join('')}</div>
+      </div>`;
+    });
+    c.innerHTML = html;
+  } else {
+    c.innerHTML = `<div class="section" id="content-top">
+      <div class="sec-header">
+        <div class="sec-title">${catIcons[currentCategory] || '🎬'} <span class="accent">${currentCategory === 'all' ? 'All Titles' : currentCategory}</span>${searchQuery ? ` · "${searchQuery}"` : ''}<div class="sec-line"></div></div>
+        <span style="color:var(--muted);font-size:.82rem">${filtered.length} title${filtered.length !== 1 ? 's' : ''}</span>
+      </div>
+      <div class="cards-grid">${filtered.map(v => videoCard(v)).join('')}</div>
+    </div>`;
+  }
+}
+
+function featCard(v) {
+  const id = v.id.replace(/'/g, "\\'");
+  return `<div class="feat-card" onclick="openModal('${id}')">
+    ${v.thumbnailUrl ? `<img class="feat-img" src="${v.thumbnailUrl}" loading="lazy" alt="${escHtml(v.title || '')}"/>` : `<div class="feat-ph"></div>`}
+    <div class="feat-overlay">
+      <div class="feat-cat">${escHtml(v.category || 'General')}</div>
+      <div class="feat-name">${escHtml(v.title || 'Untitled')}</div>
+      <div class="feat-row"><span>▶ Watch</span>${v.duration ? `<span>⏱ ${escHtml(v.duration)}</span>` : ''}<div class="feat-play-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="#000"><polygon points="5,3 19,12 5,21"/></svg></div></div>
+    </div>
+  </div>`;
+}
+
+function videoCard(v, isNew) {
+  const id = v.id.replace(/'/g, "\\'");
+  return `<div class="v-card" onclick="openModal('${id}')">
+    <div class="v-thumb">
+      ${v.thumbnailUrl
+        ? `<img src="${v.thumbnailUrl}" loading="lazy" alt="${escHtml(v.title || '')}" style="width:100%;height:100%;object-fit:cover;display:block;"/>`
+        : `<div class="v-ph"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"><polygon points="5,3 19,12 5,21"/></svg></div>`}
+      <div class="v-hover-layer"><div class="v-play-ring"><svg width="17" height="17" viewBox="0 0 24 24" fill="#000"><polygon points="5,3 19,12 5,21"/></svg></div></div>
+      ${isNew ? `<div class="new-tag">NEW</div>` : ''}
+    </div>
+    <div class="v-body">
+      <div class="v-genre">${escHtml(v.category || 'General')}</div>
+      <div class="v-title">${escHtml(v.title || 'Untitled')}</div>
+      <div class="v-meta">${v.duration ? `<span>${escHtml(v.duration)}</span>` : ''}${v.year ? `<span class="v-dot"></span><span>${escHtml(String(v.year))}</span>` : ''}</div>
+    </div>
+  </div>`;
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// ─── WATCHLIST ───────────────────────────────────────────────────
+window.toggleWatchlist = async function() {
+  if (!currentUser) { openAuthModal(); return; }
+  if (!currentModalVideoId) return;
+  const wl = userProfile.watchlist || [];
+  const isIn = wl.includes(currentModalVideoId);
+  try {
+    const ref = doc(db, 'users', currentUser.uid);
+    if (isIn) {
+      await updateDoc(ref, { watchlist: arrayRemove(currentModalVideoId) });
+      userProfile.watchlist = wl.filter(id => id !== currentModalVideoId);
+    } else {
+      await updateDoc(ref, { watchlist: arrayUnion(currentModalVideoId) });
+      userProfile.watchlist = [...wl, currentModalVideoId];
+    }
+    updateWatchlistBtn();
+    updateProfileUI();
+  } catch (e) {
+    console.error('Watchlist error:', e);
+    showToastMsg('⚠️ Failed to update watchlist.');
+  }
+};
+
+function updateWatchlistBtn() {
+  const btn = document.getElementById('watchlistToggleBtn');
+  if (!btn || !currentModalVideoId) return;
+  const wl = userProfile?.watchlist || [];
+  const isIn = wl.includes(currentModalVideoId);
+  btn.innerHTML = isIn
+    ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20,6 9,17 4,12"/></svg> In My List`
+    : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add to List`;
+}
+
+function renderWatchlist() {
+  const grid = document.getElementById('watchlistGrid');
+  if (!grid) return;
+  const wl = userProfile?.watchlist || [];
+  const wlVideos = allVideos.filter(v => wl.includes(v.id));
+  if (!wlVideos.length) {
+    grid.innerHTML = `<div class="empty"><p>Your watchlist is empty</p><small>Add movies using the + button</small></div>`;
+    return;
+  }
+  grid.innerHTML = wlVideos.map(v => videoCard(v)).join('');
+}
+
+// ─── AD SYSTEM ───────────────────────────────────────────────────
+function shouldShowAd() {
+  if (!currentUser) return allAds.length > 0;
+  return (userProfile?.plan || 'free') === 'free' && allAds.length > 0;
+}
+
+function playAd(afterAdCb) {
+  if (!shouldShowAd()) { afterAdCb(); return; }
+  const ad = allAds[Math.floor(Math.random() * allAds.length)];
+  if (!ad || !ad.videoUrl) { afterAdCb(); return; }
+
+  adAfterCallback = afterAdCb;
+  const adVideoEl = document.getElementById('adVideo');
+  adVideoEl.src = ad.videoUrl;
+  adVideoEl.muted = false;
+  adVideoEl.load();
+
+  document.getElementById('adBrand').textContent = ad.brand || 'Sponsor';
+  document.getElementById('adInfo').textContent = ad.description || 'Advertisement';
+  document.getElementById('adOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  const skipBtn = document.getElementById('adSkipBtn');
+  skipBtn.className = 'ad-skip-countdown';
+  skipBtn.innerHTML = `Skip in <span id="adCountdown">5</span>s`;
+
+  let secs = 5;
+  adVideoEl.play().catch(() => {});
+
+  clearInterval(adCountdownTimer);
+  adCountdownTimer = setInterval(() => {
+    secs--;
+    const cdEl = document.getElementById('adCountdown');
+    if (cdEl) cdEl.textContent = secs;
+    if (secs <= 0) {
+      clearInterval(adCountdownTimer);
+      skipBtn.className = 'ad-skip-countdown skippable';
+      skipBtn.textContent = 'Skip Ad ›';
+    }
+  }, 1000);
+
+  adVideoEl.ontimeupdate = () => {
+    const pct = adVideoEl.duration ? (adVideoEl.currentTime / adVideoEl.duration * 100) : 0;
+    document.getElementById('adProgressFill').style.width = pct + '%';
+    const left = Math.ceil(adVideoEl.duration - adVideoEl.currentTime);
+    document.getElementById('adTimeLeft').textContent = !isNaN(left) ? `0:${String(left).padStart(2, '0')} remaining` : '';
+  };
+  adVideoEl.onended = () => { closeAd(); if (adAfterCallback) { adAfterCallback(); adAfterCallback = null; } };
+}
+
+window.skipAd = function() {
+  const btn = document.getElementById('adSkipBtn');
+  if (!btn.classList.contains('skippable')) return;
+  closeAd();
+  if (adAfterCallback) { adAfterCallback(); adAfterCallback = null; }
+};
+
+function closeAd() {
+  clearInterval(adCountdownTimer);
+  document.getElementById('adOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+  const adVideoEl = document.getElementById('adVideo');
+  adVideoEl.pause();
+  adVideoEl.src = '';
+  adVideoEl.ontimeupdate = null;
+  adVideoEl.onended = null;
+}
+
+// ─── VIDEO MODAL ─────────────────────────────────────────────────
+window.openModal = function(id) {
+  const v = allVideos.find(x => x.id === id);
+  if (!v) { console.warn('Video not found:', id); return; }
+  currentModalVideoId = id;
+
+  document.getElementById('modalTitle').textContent = v.title || 'Untitled';
+  document.getElementById('modalDesc').textContent = v.description || 'No description available.';
+  document.getElementById('modalTags').innerHTML = [v.category, v.duration, v.year]
+    .filter(Boolean)
+    .map(t => `<span class="modal-tag">${escHtml(String(t))}</span>`)
+    .join('');
+
+  updateWatchlistBtn();
+
+  playAd(() => {
+    const vid = document.getElementById('modalVideo');
+    vid.src = v.videoUrl || '';
+    vid.load();
+    document.getElementById('modalWrap').classList.add('open');
+    document.body.style.overflow = 'hidden';
+
+    // Increment watched count
+    if (currentUser && userProfile) {
+      const newCount = (userProfile.watchedCount || 0) + 1;
+      userProfile.watchedCount = newCount;
+      updateDoc(doc(db, 'users', currentUser.uid), { watchedCount: newCount }).catch(console.error);
+    }
+  });
+};
+
+window.closeModalOnBg = function(e) {
+  if (e.target === document.getElementById('modalWrap')) closeModalBtn();
+};
+window.closeModalBtn = function() {
+  document.getElementById('modalWrap').classList.remove('open');
+  const v = document.getElementById('modalVideo');
+  v.pause();
+  v.src = '';
+  document.body.style.overflow = '';
+};
+
+// Escape key closes modals
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    if (document.getElementById('modalWrap').classList.contains('open')) closeModalBtn();
+    else if (document.getElementById('authModal').classList.contains('open')) closeAuthModal();
+    else if (document.getElementById('upgradeModal').classList.contains('open')) closeUpgradeModal();
+  }
+});
+
+// ─── TOAST ───────────────────────────────────────────────────────
+let toastTimeout = null;
+function showToastMsg(msg) {
+  const t = document.getElementById('siteToast');
+  t.textContent = msg;
+  t.style.transform = 'translateY(0)';
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => { t.style.transform = 'translateY(100px)'; }, 3200);
+}
+window.showToastMsg = showToastMsg;
+
+// ─── BOOT ────────────────────────────────────────────────────────
+loadVideos();
+</script>
+</body>
+</html>
