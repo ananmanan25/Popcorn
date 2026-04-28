@@ -23,7 +23,6 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .sidebar-footer{padding:16px 24px;border-top:1px solid var(--border);}
 .back-btn{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:.85rem;text-decoration:none;transition:.2s;}
 .back-btn:hover{color:var(--text);}
-
 .main{flex:1;padding:40px;overflow-y:auto;}
 .page{display:none;}
 .page.active{display:block;}
@@ -32,8 +31,6 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .page-title span{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
 .page-title.ad-title span{background:linear-gradient(135deg,#a78bfa,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
 .page-sub{color:var(--muted);font-size:.92rem;}
-
-/* STATS */
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:36px;}
 .stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;transition:.2s;}
 .stat-card:hover{border-color:rgba(245,166,35,0.2);}
@@ -41,8 +38,6 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .stat-val{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:1px;color:var(--accent);}
 .stat-val.purple{color:#a78bfa;}
 .stat-label{color:var(--muted);font-size:.8rem;margin-top:2px;}
-
-/* UPLOAD FORM */
 .upload-section{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:32px;margin-bottom:32px;}
 .upload-section.ad-section{border-color:rgba(124,58,237,0.2);}
 .section-title{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:1px;margin-bottom:24px;display:flex;align-items:center;gap:10px;}
@@ -57,8 +52,6 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent);background:rg
 .ad-input:focus{border-color:#a78bfa;background:rgba(124,58,237,0.04);}
 textarea{resize:vertical;min-height:90px;line-height:1.6;}
 select option{background:var(--card);color:var(--text);}
-
-/* TOGGLE SWITCH */
 .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(255,255,255,0.03);border-radius:10px;border:1px solid var(--border);}
 .toggle-label{font-size:.9rem;font-weight:500;}
 .toggle-switch{position:relative;width:46px;height:26px;cursor:pointer;}
@@ -67,8 +60,6 @@ select option{background:var(--card);color:var(--text);}
 .toggle-switch input:checked + .toggle-track{background:var(--accent);}
 .toggle-knob{position:absolute;top:3px;left:3px;width:20px;height:20px;background:#fff;border-radius:50%;transition:.3s;}
 .toggle-switch input:checked ~ .toggle-knob{transform:translateX(20px);}
-
-/* DROP ZONES */
 .drop-zone{border:2px dashed var(--border);border-radius:14px;padding:32px;text-align:center;cursor:pointer;transition:.3s;position:relative;overflow:hidden;}
 .drop-zone:hover,.drop-zone.drag-over{border-color:var(--accent);background:rgba(245,166,35,0.04);}
 .drop-zone.ad-drop:hover,.drop-zone.ad-drop.drag-over{border-color:#a78bfa;background:rgba(124,58,237,0.04);}
@@ -85,8 +76,6 @@ select option{background:var(--card);color:var(--text);}
 .file-preview-name{font-size:.88rem;font-weight:600;display:flex;align-items:center;gap:8px;}
 .file-preview-size{font-size:.78rem;color:var(--muted);margin-top:3px;}
 .preview-thumb{width:100%;max-height:120px;object-fit:cover;border-radius:8px;margin-top:10px;}
-
-/* FORM ACTIONS */
 .form-actions{display:flex;gap:12px;margin-top:28px;align-items:center;}
 .btn-submit{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000;font-weight:700;border:none;border-radius:12px;padding:14px 32px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:1rem;transition:.2s;box-shadow:0 8px 30px rgba(245,166,35,0.25);}
 .btn-submit:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 12px 40px rgba(245,166,35,0.35);}
@@ -96,15 +85,11 @@ select option{background:var(--card);color:var(--text);}
 .btn-reset{background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--muted);font-family:'DM Sans',sans-serif;font-size:.95rem;padding:14px 24px;border-radius:12px;cursor:pointer;transition:.2s;}
 .btn-reset:hover{color:var(--text);background:rgba(255,255,255,0.1);}
 .upload-status{font-size:.9rem;color:var(--muted);}
-
-/* TOAST */
 .toast{position:fixed;top:24px;right:24px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 20px;display:flex;align-items:center;gap:12px;z-index:999;transform:translateX(120%);transition:transform .3s ease;box-shadow:0 20px 60px rgba(0,0,0,.5);max-width:340px;}
 .toast.show{transform:translateX(0);}
 .toast.success{border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.08);}
 .toast.error{border-color:rgba(239,68,68,0.3);background:rgba(239,68,68,0.08);}
 .toast-msg{font-size:.9rem;font-weight:500;}
-
-/* TABLE */
 .videos-section{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:32px;}
 .table-wrap{overflow-x:auto;margin-top:4px;}
 table{width:100%;border-collapse:collapse;}
@@ -131,8 +116,6 @@ tr:hover td{background:rgba(255,255,255,0.02);}
 </head>
 <body>
 <div class="layout">
-
-<!-- SIDEBAR -->
 <div class="sidebar">
   <div class="sidebar-logo">
     <div class="logo">🍿 POPCORN</div>
@@ -147,6 +130,15 @@ tr:hover td{background:rgba(255,255,255,0.02);}
     <div class="nav-item" id="sideMovieList" onclick="showPage('movieList')">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17,2 12,7 7,2"/></svg>
       Manage Movies
+    </div>
+    <div class="nav-section">TV Series</div>
+    <div class="nav-item" id="sideSeries" onclick="showPage('series')">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      Upload TV Series
+    </div>
+    <div class="nav-item" id="sideSeriesList" onclick="showPage('seriesList')">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      Manage Series
     </div>
     <div class="nav-section">Advertising</div>
     <div class="nav-item" id="sideAds" onclick="showPage('ads')">
@@ -171,23 +163,20 @@ tr:hover td{background:rgba(255,255,255,0.02);}
   </div>
 </div>
 
-<!-- MAIN -->
 <div class="main">
-
-  <!-- STATS (always visible) -->
   <div class="stats">
     <div class="stat-card"><div class="stat-icon">🎬</div><div class="stat-val" id="totalMovies">—</div><div class="stat-label">Total Movies</div></div>
-    <div class="stat-card"><div class="stat-icon">📺</div><div class="stat-val purple" id="totalAds">—</div><div class="stat-label">Active Ads</div></div>
+    <div class="stat-card"><div class="stat-icon">📺</div><div class="stat-val" id="totalSeries" style="color:#38bdf8">—</div><div class="stat-label">TV Series</div></div>
+    <div class="stat-card"><div class="stat-icon">🎞</div><div class="stat-val purple" id="totalEpisodes">—</div><div class="stat-label">Total Episodes</div></div>
+    <div class="stat-card"><div class="stat-icon">📢</div><div class="stat-val purple" id="totalAds">—</div><div class="stat-label">Active Ads</div></div>
     <div class="stat-card"><div class="stat-icon">⚡</div><div class="stat-val" id="actionCount">—</div><div class="stat-label">Action</div></div>
-    <div class="stat-card"><div class="stat-icon">🎭</div><div class="stat-val" id="dramaCount">—</div><div class="stat-label">Drama</div></div>
-    <div class="stat-card"><div class="stat-icon">😂</div><div class="stat-val" id="comedyCount">—</div><div class="stat-label">Comedy</div></div>
   </div>
 
-  <!-- PAGE: UPLOAD MOVIE -->
+  <!-- UPLOAD MOVIE -->
   <div class="page active" id="page-movies">
     <div class="page-header">
       <div class="page-title">Upload <span>New Movie</span></div>
-      <div class="page-sub">Add short films and movies to the PopCorn library</div>
+      <div class="page-sub">Add movies to the PopCorn library — they appear on the site immediately</div>
     </div>
     <div class="upload-section">
       <div class="section-title">🎥 <span>Movie</span> Details</div>
@@ -245,7 +234,7 @@ tr:hover td{background:rgba(255,255,255,0.02);}
     </div>
   </div>
 
-  <!-- PAGE: MOVIE LIST -->
+  <!-- MOVIE LIST -->
   <div class="page" id="page-movieList">
     <div class="page-header">
       <div class="page-title">Manage <span>Movies</span></div>
@@ -260,11 +249,111 @@ tr:hover td{background:rgba(255,255,255,0.02);}
     </div>
   </div>
 
-  <!-- PAGE: UPLOAD AD -->
+  <!-- ===== UPLOAD TV SERIES ===== -->
+  <div class="page" id="page-series">
+    <div class="page-header">
+      <div class="page-title">Upload <span style="background:linear-gradient(135deg,#38bdf8,#0ea5e9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">TV Series</span></div>
+      <div class="page-sub">Add a new TV series with seasons &amp; episodes — appears on the site immediately</div>
+    </div>
+
+    <!-- Series Info -->
+    <div class="upload-section" style="border-color:rgba(56,189,248,0.2);">
+      <div class="section-title">📺 <span style="color:#38bdf8;">Series</span> Details</div>
+      <div class="form-grid">
+        <div class="form-group"><label>Series Title *</label><input type="text" id="sTitle" placeholder="e.g. Breaking Bad"/></div>
+        <div class="form-group"><label>Category / Genre *</label>
+          <select id="sCat"><option value="">Select category...</option>
+            <option>Action</option><option>Comedy</option><option>Drama</option><option>Horror</option>
+            <option>Documentary</option><option>Romance</option><option>Thriller</option>
+            <option>Animation</option><option>Sci-Fi</option><option>Fantasy</option>
+            <option>Mystery</option><option>Adventure</option><option>Crime</option><option>Reality</option><option>Other</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Release Year</label><input type="text" id="sYear" placeholder="e.g. 2024"/></div>
+        <div class="form-group"><label>Rating (0–10)</label><input type="number" id="sRating" placeholder="e.g. 8.5" min="0" max="10" step="0.1"/></div>
+        <div class="form-group"><label>Network / Badge Label</label><input type="text" id="sBadge" placeholder="e.g. HBO, Netflix, NEW..."/></div>
+        <div class="form-group"><label>Status</label>
+          <select id="sStatus">
+            <option value="">Select status...</option>
+            <option value="ongoing">Ongoing</option>
+            <option value="completed">Completed</option>
+            <option value="upcoming">Upcoming</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Cast (comma-separated)</label><input type="text" id="sCast" placeholder="e.g. Bryan Cranston, Aaron Paul"/></div>
+        <div class="form-group"><label>Director / Creator</label><input type="text" id="sDirector" placeholder="e.g. Vince Gilligan"/></div>
+        <div class="form-group full"><label>Description *</label><textarea id="sDesc" placeholder="Brief description of the series..."></textarea></div>
+        <div class="form-group">
+          <div class="toggle-row"><span class="toggle-label">🔥 Mark as Trending</span>
+            <label class="toggle-switch"><input type="checkbox" id="sTrending"/><div class="toggle-track"></div><div class="toggle-knob"></div></label>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="toggle-row"><span class="toggle-label">✨ Mark as New &amp; Hot</span>
+            <label class="toggle-switch"><input type="checkbox" id="sNew"/><div class="toggle-track"></div><div class="toggle-knob"></div></label>
+          </div>
+        </div>
+        <div class="form-group full">
+          <label>Series Poster / Thumbnail *</label>
+          <div class="drop-zone" id="sThumbDrop" style="border-color:rgba(56,189,248,0.3);">
+            <input type="file" accept="image/*" id="sThumbFile" onchange="handleSThumb(this)"/>
+            <div class="drop-icon">🖼️</div>
+            <div class="drop-text">Drop poster here or click to browse</div>
+            <div class="drop-hint">JPG, PNG, WEBP · Recommended 500×750 (portrait)</div>
+          </div>
+          <div class="file-preview" id="sThumbPreview">
+            <div class="file-preview-name">🖼️ <span id="sThumbName"></span></div>
+            <img id="sThumbImg" class="preview-thumb" src="" alt="" style="max-height:160px;max-width:120px;object-fit:cover;border-radius:10px;margin-top:8px;"/>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Seasons & Episodes Builder -->
+    <div class="upload-section" style="border-color:rgba(56,189,248,0.2);">
+      <div class="section-title" style="justify-content:space-between;flex-wrap:wrap;gap:12px;">
+        <span>🎞 <span style="color:#38bdf8;">Seasons</span> &amp; Episodes</span>
+        <button onclick="addSeason()" style="background:rgba(56,189,248,0.1);border:1px solid rgba(56,189,248,0.3);color:#38bdf8;border-radius:10px;padding:9px 20px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:700;transition:.2s;" onmouseover="this.style.background='rgba(56,189,248,0.2)'" onmouseout="this.style.background='rgba(56,189,248,0.1)'">+ Add Season</button>
+      </div>
+      <div id="seasonsBuilder" style="display:flex;flex-direction:column;gap:20px;"></div>
+      <div id="noSeasonsMsg" style="text-align:center;padding:40px;color:var(--muted);font-size:.9rem;background:rgba(255,255,255,0.02);border-radius:12px;border:1px dashed var(--border);margin-top:4px;">
+        Click <b style="color:#38bdf8;">+ Add Season</b> to start building your series
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn-submit" id="seriesSubmitBtn" onclick="uploadSeries()" style="background:linear-gradient(135deg,#38bdf8,#0ea5e9);box-shadow:0 8px 30px rgba(56,189,248,0.25);">
+        <div class="spinner" id="seriesSpinner"></div>
+        <span id="seriesSubmitText">📺 Upload TV Series</span>
+      </button>
+      <button class="btn-reset" onclick="resetSeriesForm()">Clear Form</button>
+      <div class="upload-status" id="seriesStatus"></div>
+    </div>
+  </div>
+
+  <!-- ===== MANAGE TV SERIES ===== -->
+  <div class="page" id="page-seriesList">
+    <div class="page-header">
+      <div class="page-title">Manage <span style="background:linear-gradient(135deg,#38bdf8,#0ea5e9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">TV Series</span></div>
+      <div class="page-sub">View, expand episodes, and delete series from the library</div>
+    </div>
+    <div class="videos-section" style="border-color:rgba(56,189,248,0.2);">
+      <div class="section-title">📋 <span style="color:#38bdf8;">All</span> TV Series</div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Poster</th><th>Title</th><th>Category</th><th>Seasons</th><th>Episodes</th><th>Status</th><th>Uploaded</th><th>Actions</th></tr></thead>
+        <tbody id="seriesTableBody"><tr><td colspan="8" class="empty-table"><div style="font-size:2rem">📭</div><p>Loading...</p></td></tr></tbody>
+      </table></div>
+    </div>
+    <div id="seriesDetailPanel" style="display:none;background:var(--card);border:1px solid rgba(56,189,248,0.2);border-radius:18px;padding:28px;margin-top:24px;">
+      <div id="seriesDetailInner"></div>
+    </div>
+  </div>
+
+  <!-- UPLOAD AD -->
   <div class="page" id="page-ads">
     <div class="page-header">
       <div class="page-title ad-title">Upload <span>Advertisement</span></div>
-      <div class="page-sub">Add video ads that play before movies for free-tier users. Users can skip after 5 seconds.</div>
+      <div class="page-sub">Ad videos play automatically before content for free-tier users. Users can skip after the set delay.</div>
     </div>
     <div class="upload-section ad-section">
       <div class="section-title ad-section-title">📺 <span>Ad</span> Details</div>
@@ -272,7 +361,7 @@ tr:hover td{background:rgba(255,255,255,0.02);}
         <div class="form-group"><label>Brand / Advertiser Name *</label><input type="text" id="adBrandInput" class="ad-input" placeholder="e.g. Nike, Coca-Cola..."/></div>
         <div class="form-group"><label>Ad Type</label>
           <select id="adTypeInput" class="ad-input" style="background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:10px;padding:12px 16px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.95rem;outline:none;width:100%;">
-            <option value="pre-roll">Pre-Roll (before movie)</option>
+            <option value="pre-roll">Pre-Roll (before content)</option>
             <option value="product">Product Ad</option>
             <option value="service">Service Ad</option>
             <option value="brand">Brand Awareness</option>
@@ -334,11 +423,11 @@ tr:hover td{background:rgba(255,255,255,0.02);}
     </div>
   </div>
 
-  <!-- PAGE: AD LIST -->
+  <!-- AD LIST -->
   <div class="page" id="page-adList">
     <div class="page-header">
       <div class="page-title ad-title">Manage <span>Advertisements</span></div>
-      <div class="page-sub">View, enable/disable and delete advertisement campaigns</div>
+      <div class="page-sub">Enable/disable ads — active ads play automatically before content on the site</div>
     </div>
     <div class="videos-section" style="border-color:rgba(124,58,237,0.2);">
       <div class="section-title ad-section-title">📋 <span>All</span> Advertisements</div>
@@ -348,11 +437,9 @@ tr:hover td{background:rgba(255,255,255,0.02);}
       </table></div>
     </div>
   </div>
+</div>
+</div>
 
-</div><!-- /main -->
-</div><!-- /layout -->
-
-<!-- TOAST -->
 <div class="toast" id="toast"><div class="toast-msg" id="toastMsg"></div></div>
 
 <script type="module">
@@ -371,61 +458,52 @@ const CLOUDINARY_PRESET='my_preset';
 const app=initializeApp(firebaseConfig);
 const db=getFirestore(app);
 
-let allMovies=[], allAds=[];
+let allMovies=[], allAds=[], allSeriesData=[];
 let selectedVideoFile=null, selectedThumbFile=null;
 let selectedAdVideoFile=null, selectedAdThumbFile=null;
+let selectedSThumbFile=null;
+let seasonsData=[];
+let seasonCounter=0;
 
-// PAGE NAVIGATION
-window.showPage = (page) => {
+/* ── PAGE ROUTING ── */
+window.showPage=(page)=>{
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active','ad-active'));
-  const map = {movies:'sideMovies',movieList:'sideMovieList',ads:'sideAds',adList:'sideAdList'};
-  const el = document.getElementById(map[page]);
-  if(el) el.classList.add(page.includes('ad')||page.includes('Ad')?'ad-active':'active');
+  document.querySelectorAll('.nav-item').forEach(n=>{n.classList.remove('active','ad-active');n.style.background='';n.style.borderColor='';});
+  const map={movies:'sideMovies',movieList:'sideMovieList',series:'sideSeries',seriesList:'sideSeriesList',ads:'sideAds',adList:'sideAdList'};
+  const el=document.getElementById(map[page]);
+  if(el){
+    if(page==='series'||page==='seriesList'){el.classList.add('active');el.style.background='rgba(56,189,248,0.08)';el.style.borderColor='rgba(56,189,248,0.2)';}
+    else if(page.includes('ad')||page.includes('Ad')){el.classList.add('ad-active');}
+    else{el.classList.add('active');}
+  }
+  if(page==='seriesList') renderSeriesTable();
 };
 
-// CLOUDINARY UPLOAD
-async function uploadToCloudinary(file, resourceType, onProgress) {
+/* ── CLOUDINARY UPLOAD ── */
+async function uploadToCloudinary(file,resourceType,onProgress){
   return new Promise((resolve,reject)=>{
     const fd=new FormData();
     fd.append('file',file);fd.append('upload_preset',CLOUDINARY_PRESET);fd.append('cloud_name',CLOUDINARY_CLOUD);
     const xhr=new XMLHttpRequest();
     xhr.open('POST',`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/${resourceType}/upload`);
     xhr.upload.onprogress=e=>{if(e.lengthComputable)onProgress(Math.round(e.loaded/e.total*100));};
-    xhr.onload=()=>{if(xhr.status===200){const res=JSON.parse(xhr.responseText);resolve(res.secure_url);}else{reject(new Error('Upload failed: '+xhr.responseText));}};
+    xhr.onload=()=>{if(xhr.status===200){resolve(JSON.parse(xhr.responseText).secure_url);}else{reject(new Error('Upload failed'));}};
     xhr.onerror=()=>reject(new Error('Network error'));
     xhr.send(fd);
   });
 }
 
-// FILE HANDLERS - MOVIE
-window.handleVideoSelect=function(input){
-  const f=input.files[0];if(!f)return;selectedVideoFile=f;
-  document.getElementById('videoName').textContent=f.name;document.getElementById('videoSize').textContent=formatSize(f.size);
-  document.getElementById('videoPreview').style.display='block';
-};
-window.handleThumbSelect=function(input){
-  const f=input.files[0];if(!f)return;selectedThumbFile=f;
-  document.getElementById('thumbName').textContent=f.name;
-  const r=new FileReader();r.onload=e=>{document.getElementById('thumbImgPrev').src=e.target.result;document.getElementById('thumbPreview').style.display='block';};r.readAsDataURL(f);
-};
-
-// FILE HANDLERS - AD
-window.handleAdVideoSelect=function(input){
-  const f=input.files[0];if(!f)return;selectedAdVideoFile=f;
-  document.getElementById('adVideoFileName').textContent=f.name;document.getElementById('adVideoFileSize').textContent=formatSize(f.size);
-  document.getElementById('adVideoPreview').style.display='block';
-};
-window.handleAdThumbSelect=function(input){
-  const f=input.files[0];if(!f)return;selectedAdThumbFile=f;
-  document.getElementById('adThumbFileName').textContent=f.name;
-  const r=new FileReader();r.onload=e=>{document.getElementById('adThumbImgPrev').src=e.target.result;document.getElementById('adThumbPreview').style.display='block';};r.readAsDataURL(f);
-};
+/* ── FILE HANDLERS ── */
+window.handleVideoSelect=function(input){const f=input.files[0];if(!f)return;selectedVideoFile=f;document.getElementById('videoName').textContent=f.name;document.getElementById('videoSize').textContent=formatSize(f.size);document.getElementById('videoPreview').style.display='block';};
+window.handleThumbSelect=function(input){const f=input.files[0];if(!f)return;selectedThumbFile=f;document.getElementById('thumbName').textContent=f.name;const r=new FileReader();r.onload=e=>{document.getElementById('thumbImgPrev').src=e.target.result;document.getElementById('thumbPreview').style.display='block';};r.readAsDataURL(f);};
+window.handleAdVideoSelect=function(input){const f=input.files[0];if(!f)return;selectedAdVideoFile=f;document.getElementById('adVideoFileName').textContent=f.name;document.getElementById('adVideoFileSize').textContent=formatSize(f.size);document.getElementById('adVideoPreview').style.display='block';};
+window.handleAdThumbSelect=function(input){const f=input.files[0];if(!f)return;selectedAdThumbFile=f;document.getElementById('adThumbFileName').textContent=f.name;const r=new FileReader();r.onload=e=>{document.getElementById('adThumbImgPrev').src=e.target.result;document.getElementById('adThumbPreview').style.display='block';};r.readAsDataURL(f);};
+window.handleSThumb=function(input){const f=input.files[0];if(!f)return;selectedSThumbFile=f;document.getElementById('sThumbName').textContent=f.name;const r=new FileReader();r.onload=e=>{document.getElementById('sThumbImg').src=e.target.result;document.getElementById('sThumbPreview').style.display='block';};r.readAsDataURL(f);};
 
 function formatSize(bytes){if(bytes>1073741824)return(bytes/1073741824).toFixed(1)+' GB';if(bytes>1048576)return(bytes/1048576).toFixed(1)+' MB';return(bytes/1024).toFixed(0)+' KB';}
 
-// UPLOAD MOVIE
+/* ── UPLOAD MOVIE ── */
 window.uploadMovie=async function(){
   const title=document.getElementById('titleInput').value.trim();
   const category=document.getElementById('catInput').value;
@@ -435,7 +513,7 @@ window.uploadMovie=async function(){
   if(!title){showToast('error','⚠️ Please enter a movie title');return;}
   if(!category){showToast('error','⚠️ Please select a category');return;}
   if(!selectedVideoFile){showToast('error','⚠️ Please select a video file');return;}
-  setMovieLoading(true);setMovieStatus('Uploading video to Cloudinary...');
+  setMovieLoading(true);setMovieStatus('Uploading video...');
   try{
     const prog=document.getElementById('videoProgress');const fill=document.getElementById('videoFill');const pt=document.getElementById('videoProgressText');
     prog.style.display='block';
@@ -443,23 +521,16 @@ window.uploadMovie=async function(){
     let thumbnailUrl='';
     if(selectedThumbFile){setMovieStatus('Uploading thumbnail...');thumbnailUrl=await uploadToCloudinary(selectedThumbFile,'image',()=>{});}
     setMovieStatus('Saving to database...');
-    await addDoc(collection(db,'videos'),{title,category,duration,year,description,videoUrl,thumbnailUrl,createdAt:serverTimestamp()});
+    await addDoc(collection(db,'videos'),{title,category,duration,year,description,videoUrl,thumbnailUrl,_type:'movie',isNew:true,createdAt:serverTimestamp()});
     showToast('success','✅ Movie uploaded successfully!');resetMovieForm();loadAll();
   }catch(err){console.error(err);showToast('error','❌ Upload failed: '+err.message);}
   finally{setMovieLoading(false);setMovieStatus('');document.getElementById('videoProgress').style.display='none';document.getElementById('videoFill').style.width='0%';}
 };
-
 function setMovieLoading(on){document.getElementById('movieSubmitBtn').disabled=on;document.getElementById('movieSpinner').style.display=on?'block':'none';document.getElementById('movieSubmitText').textContent=on?'Uploading...':'🚀 Upload Movie';}
 function setMovieStatus(msg){document.getElementById('movieStatus').textContent=msg;}
+window.resetMovieForm=function(){['titleInput','catInput','durInput','yearInput','descInput'].forEach(id=>document.getElementById(id).value='');document.getElementById('videoFile').value='';document.getElementById('thumbFile').value='';document.getElementById('videoPreview').style.display='none';document.getElementById('thumbPreview').style.display='none';selectedVideoFile=null;selectedThumbFile=null;};
 
-window.resetMovieForm=function(){
-  ['titleInput','catInput','durInput','yearInput','descInput'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('videoFile').value='';document.getElementById('thumbFile').value='';
-  document.getElementById('videoPreview').style.display='none';document.getElementById('thumbPreview').style.display='none';
-  selectedVideoFile=null;selectedThumbFile=null;
-};
-
-// UPLOAD AD
+/* ── UPLOAD AD ── */
 window.uploadAd=async function(){
   const brand=document.getElementById('adBrandInput').value.trim();
   const type=document.getElementById('adTypeInput').value;
@@ -482,35 +553,190 @@ window.uploadAd=async function(){
   }catch(err){console.error(err);showToast('error','❌ Upload failed: '+err.message);}
   finally{setAdLoading(false);setAdStatus('');document.getElementById('adVideoProgress').style.display='none';document.getElementById('adVideoFill').style.width='0%';}
 };
-
 function setAdLoading(on){document.getElementById('adSubmitBtn').disabled=on;document.getElementById('adSpinner').style.display=on?'block':'none';document.getElementById('adSubmitText').textContent=on?'Uploading...':'📺 Upload Advertisement';}
 function setAdStatus(msg){document.getElementById('adStatus').textContent=msg;}
+window.resetAdForm=function(){['adBrandInput','adTypeInput','adSkipDelayInput','adUrlInput','adDescInput'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.getElementById('adSkipDelayInput').value='5';document.getElementById('adVideoFile').value='';document.getElementById('adThumbFile').value='';document.getElementById('adVideoPreview').style.display='none';document.getElementById('adThumbPreview').style.display='none';document.getElementById('adActiveToggle').checked=true;selectedAdVideoFile=null;selectedAdThumbFile=null;};
 
-window.resetAdForm=function(){
-  ['adBrandInput','adTypeInput','adSkipDelayInput','adUrlInput','adDescInput'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  document.getElementById('adSkipDelayInput').value='5';
-  document.getElementById('adVideoFile').value='';document.getElementById('adThumbFile').value='';
-  document.getElementById('adVideoPreview').style.display='none';document.getElementById('adThumbPreview').style.display='none';
-  document.getElementById('adActiveToggle').checked=true;
-  selectedAdVideoFile=null;selectedAdThumbFile=null;
+/* ═══════════════════════════════════════════
+   TV SERIES — SEASONS / EPISODES BUILDER
+═══════════════════════════════════════════ */
+window.addSeason=function(){
+  seasonCounter++;
+  const sn=seasonCounter;
+  seasonsData.push({n:sn,episodes:[]});
+  document.getElementById('noSeasonsMsg').style.display='none';
+  const wrap=document.createElement('div');
+  wrap.id='season_'+sn;
+  wrap.style.cssText='background:rgba(56,189,248,0.04);border:1px solid rgba(56,189,248,0.2);border-radius:14px;padding:20px;';
+  wrap.innerHTML=`
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:1px;color:#38bdf8;">Season ${sn}</div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="addEpisode(${sn})" style="background:rgba(56,189,248,0.1);border:1px solid rgba(56,189,248,0.3);color:#38bdf8;border-radius:8px;padding:7px 14px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:600;">+ Add Episode</button>
+        <button onclick="removeSeason(${sn})" style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);color:#f87171;border-radius:8px;padding:7px 12px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.82rem;">✕ Remove</button>
+      </div>
+    </div>
+    <div id="episodes_${sn}" style="display:flex;flex-direction:column;gap:12px;"></div>
+    <div id="noEpMsg_${sn}" style="color:var(--muted);font-size:.85rem;padding:14px;text-align:center;">No episodes yet — click + Add Episode</div>`;
+  document.getElementById('seasonsBuilder').appendChild(wrap);
 };
 
-// LOAD ALL
+window.removeSeason=function(sn){
+  seasonsData=seasonsData.filter(s=>s.n!==sn);
+  const el=document.getElementById('season_'+sn);if(el)el.remove();
+  if(!seasonsData.length)document.getElementById('noSeasonsMsg').style.display='';
+};
+
+window.addEpisode=function(sn){
+  const season=seasonsData.find(s=>s.n===sn);if(!season)return;
+  const epN=season.episodes.length+1;
+  season.episodes.push({n:epN,t:'',desc:'',d:'',videoUrl:'',thumbUrl:'',videoFile:null,thumbFile:null});
+  document.getElementById('noEpMsg_'+sn).style.display='none';
+  const epWrap=document.createElement('div');
+  epWrap.id=`ep_${sn}_${epN}`;
+  epWrap.style.cssText='background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;';
+  epWrap.innerHTML=`
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <div style="font-weight:700;color:var(--accent);font-size:.9rem;">Episode ${epN}</div>
+      <button onclick="removeEpisode(${sn},${epN})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.85rem;padding:4px 8px;border-radius:6px;transition:.2s;" onmouseover="this.style.color='#f87171'" onmouseout="this.style.color='var(--muted)'">✕</button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group"><label>Episode Title *</label><input type="text" id="epTitle_${sn}_${epN}" placeholder="Episode title..." oninput="updateEpField(${sn},${epN},'t',this.value)"/></div>
+      <div class="form-group"><label>Duration</label><input type="text" id="epDur_${sn}_${epN}" placeholder="e.g. 45 min" oninput="updateEpField(${sn},${epN},'d',this.value)"/></div>
+      <div class="form-group full"><label>Episode Description</label><textarea id="epDesc_${sn}_${epN}" placeholder="Brief episode description..." style="min-height:70px;" oninput="updateEpField(${sn},${epN},'desc',this.value)"></textarea></div>
+      <div class="form-group full"><label>Video File *</label>
+        <div class="drop-zone" style="border-color:rgba(56,189,248,0.25);padding:20px;">
+          <input type="file" accept="video/*" onchange="handleEpVideo(${sn},${epN},this)"/>
+          <div class="drop-icon" style="font-size:1.4rem;margin-bottom:6px;">🎬</div>
+          <div class="drop-text" style="font-size:.88rem;">Drop episode video or click to browse</div>
+          <div class="drop-hint">MP4, MOV · Max 500MB</div>
+        </div>
+        <div id="epVidPreview_${sn}_${epN}" style="display:none;font-size:.82rem;color:var(--success);margin-top:6px;padding:6px 12px;background:rgba(34,197,94,0.08);border-radius:8px;"></div>
+      </div>
+      <div class="form-group full"><label>Episode Thumbnail (optional)</label>
+        <div class="drop-zone" style="border-color:rgba(56,189,248,0.25);padding:16px;">
+          <input type="file" accept="image/*" onchange="handleEpThumb(${sn},${epN},this)"/>
+          <div class="drop-icon" style="font-size:1.4rem;margin-bottom:6px;">🖼️</div>
+          <div class="drop-text" style="font-size:.88rem;">Drop thumbnail or click to browse</div>
+          <div class="drop-hint">JPG, PNG, WEBP</div>
+        </div>
+        <div id="epThumbPreview_${sn}_${epN}" style="display:none;font-size:.82rem;color:var(--muted2);margin-top:6px;"></div>
+      </div>
+    </div>`;
+  document.getElementById('episodes_'+sn).appendChild(epWrap);
+};
+
+window.removeEpisode=function(sn,epN){
+  const season=seasonsData.find(s=>s.n===sn);if(!season)return;
+  season.episodes=season.episodes.filter(e=>e.n!==epN);
+  const el=document.getElementById(`ep_${sn}_${epN}`);if(el)el.remove();
+  if(!season.episodes.length)document.getElementById('noEpMsg_'+sn).style.display='';
+};
+
+window.updateEpField=function(sn,epN,field,val){
+  const season=seasonsData.find(s=>s.n===sn);if(!season)return;
+  const ep=season.episodes.find(e=>e.n===epN);if(ep)ep[field]=val;
+};
+
+window.handleEpVideo=function(sn,epN,input){
+  const f=input.files[0];if(!f)return;
+  const season=seasonsData.find(s=>s.n===sn);if(!season)return;
+  const ep=season.episodes.find(e=>e.n===epN);if(!ep)return;
+  ep.videoFile=f;
+  const prev=document.getElementById(`epVidPreview_${sn}_${epN}`);
+  prev.style.display='block';prev.textContent='✅ '+f.name+' ('+formatSize(f.size)+')';
+};
+
+window.handleEpThumb=function(sn,epN,input){
+  const f=input.files[0];if(!f)return;
+  const season=seasonsData.find(s=>s.n===sn);if(!season)return;
+  const ep=season.episodes.find(e=>e.n===epN);if(!ep)return;
+  ep.thumbFile=f;
+  const prev=document.getElementById(`epThumbPreview_${sn}_${epN}`);
+  prev.style.display='block';prev.textContent='🖼️ '+f.name;
+};
+
+/* ── UPLOAD TV SERIES ── */
+window.uploadSeries=async function(){
+  const title=document.getElementById('sTitle').value.trim();
+  const category=document.getElementById('sCat').value;
+  const description=document.getElementById('sDesc').value.trim();
+  if(!title){showToast('error','⚠️ Please enter a series title');return;}
+  if(!category){showToast('error','⚠️ Please select a category');return;}
+  if(!description){showToast('error','⚠️ Please enter a description');return;}
+  if(!seasonsData.length){showToast('error','⚠️ Please add at least one season');return;}
+  // Validate all episodes have video files
+  for(const s of seasonsData){
+    for(const ep of s.episodes){
+      if(!ep.videoFile&&!ep.videoUrl){showToast('error',`⚠️ S${s.n} E${ep.n}: please select a video file`);return;}
+    }
+  }
+  setSeriesLoading(true);setSeriesStatus('Starting upload...');
+  try{
+    // Upload poster
+    let thumbnailUrl='';
+    if(selectedSThumbFile){setSeriesStatus('Uploading poster...');thumbnailUrl=await uploadToCloudinary(selectedSThumbFile,'image',()=>{});}
+    // Upload all episode videos & thumbs
+    const seasonsPayload=[];
+    let totalEps=0;
+    for(const s of seasonsData){
+      const eps=[];
+      for(const ep of s.episodes){
+        totalEps++;
+        setSeriesStatus(`Uploading S${s.n} E${ep.n} video...`);
+        let videoUrl=ep.videoUrl||'';
+        if(ep.videoFile) videoUrl=await uploadToCloudinary(ep.videoFile,'video',()=>{});
+        let img=ep.thumbUrl||'';
+        if(ep.thumbFile){setSeriesStatus(`Uploading S${s.n} E${ep.n} thumbnail...`);img=await uploadToCloudinary(ep.thumbFile,'image',()=>{});}
+        eps.push({n:ep.n,t:ep.t||`Episode ${ep.n}`,desc:ep.desc||'',d:ep.d||'',videoUrl,img});
+      }
+      seasonsPayload.push({n:s.n,episodes:eps});
+    }
+    setSeriesStatus('Saving to database...');
+    const year=document.getElementById('sYear').value.trim();
+    const rating=parseFloat(document.getElementById('sRating').value)||null;
+    const badge=document.getElementById('sBadge').value.trim();
+    const status=document.getElementById('sStatus').value;
+    const cast=document.getElementById('sCast').value.trim();
+    const director=document.getElementById('sDirector').value.trim();
+    const isTrending=document.getElementById('sTrending').checked;
+    const isNew=document.getElementById('sNew').checked;
+    await addDoc(collection(db,'shows'),{
+      name:title,category,description,year,rating,badge,status,cast,director,
+      thumbnailUrl,seasons:seasonsPayload,
+      isTrending,isNew,_type:'series',
+      totalEpisodes:totalEps,createdAt:serverTimestamp()
+    });
+    showToast('success','✅ TV Series uploaded successfully!');
+    resetSeriesForm();loadAll();
+  }catch(err){console.error(err);showToast('error','❌ Upload failed: '+err.message);}
+  finally{setSeriesLoading(false);setSeriesStatus('');}
+};
+
+function setSeriesLoading(on){document.getElementById('seriesSubmitBtn').disabled=on;document.getElementById('seriesSpinner').style.display=on?'block':'none';document.getElementById('seriesSubmitText').textContent=on?'Uploading...':'📺 Upload TV Series';}
+function setSeriesStatus(msg){document.getElementById('seriesStatus').textContent=msg;}
+
+window.resetSeriesForm=function(){
+  ['sTitle','sCat','sYear','sRating','sBadge','sStatus','sCast','sDirector','sDesc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('sTrending').checked=false;document.getElementById('sNew').checked=false;
+  document.getElementById('sThumbFile').value='';document.getElementById('sThumbPreview').style.display='none';
+  selectedSThumbFile=null;seasonsData=[];seasonCounter=0;
+  document.getElementById('seasonsBuilder').innerHTML='';
+  document.getElementById('noSeasonsMsg').style.display='';
+};
+
+/* ── LOAD ALL DATA ── */
 async function loadAll(){
-  try{
-    const mq=query(collection(db,'videos'),orderBy('createdAt','desc'));
-    const ms=await getDocs(mq);allMovies=ms.docs.map(d=>({id:d.id,...d.data()}));
-  }catch(e){console.error(e);}
-  try{
-    const aq=query(collection(db,'advertisements'),orderBy('createdAt','desc'));
-    const as=await getDocs(aq);allAds=as.docs.map(d=>({id:d.id,...d.data()}));
-  }catch(e){console.error(e);}
-  renderMoviesTable();renderAdsTable();updateStats();
+  try{const mq=query(collection(db,'videos'),orderBy('createdAt','desc'));const ms=await getDocs(mq);allMovies=ms.docs.map(d=>({id:d.id,...d.data()}));}catch(e){console.error(e);}
+  try{const sq=query(collection(db,'shows'),orderBy('createdAt','desc'));const ss=await getDocs(sq);allSeriesData=ss.docs.map(d=>({id:d.id,...d.data()}));}catch(e){console.error(e);}
+  try{const aq=query(collection(db,'advertisements'),orderBy('createdAt','desc'));const as=await getDocs(aq);allAds=as.docs.map(d=>({id:d.id,...d.data()}));}catch(e){console.error(e);}
+  renderMoviesTable();renderSeriesTable();renderAdsTable();updateStats();
 }
 
+/* ── RENDER TABLES ── */
 function renderMoviesTable(){
   const body=document.getElementById('moviesTableBody');
-  if(!allMovies.length){body.innerHTML=`<tr><td colspan="7" class="empty-table"><div style="font-size:2rem">🎬</div><p>No movies yet. Upload your first movie!</p></td></tr>`;return;}
+  if(!allMovies.length){body.innerHTML=`<tr><td colspan="7" class="empty-table"><div style="font-size:2rem">🎬</div><p>No movies yet.</p></td></tr>`;return;}
   body.innerHTML=allMovies.map(v=>`<tr>
     <td>${v.thumbnailUrl?`<img src="${v.thumbnailUrl}" class="td-thumb" loading="lazy"/>`:`<div class="td-thumb-placeholder">🎬</div>`}</td>
     <td style="font-weight:600;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${v.title||'—'}</td>
@@ -522,9 +748,69 @@ function renderMoviesTable(){
   </tr>`).join('');
 }
 
+function renderSeriesTable(){
+  const body=document.getElementById('seriesTableBody');
+  if(!body)return;
+  if(!allSeriesData.length){body.innerHTML=`<tr><td colspan="8" class="empty-table"><div style="font-size:2rem">📺</div><p>No TV series yet. Upload your first series!</p></td></tr>`;return;}
+  body.innerHTML=allSeriesData.map(s=>{
+    const seasons=s.seasons||[];
+    const totalEps=s.totalEpisodes||seasons.reduce((a,ss)=>a+(ss.episodes?.length||0),0);
+    const statusColor={ongoing:'var(--success)',completed:'#38bdf8',upcoming:'var(--accent)'}[s.status]||'var(--muted)';
+    return`<tr>
+      <td>${s.thumbnailUrl?`<img src="${s.thumbnailUrl}" class="td-thumb" loading="lazy" style="aspect-ratio:2/3;width:40px;border-radius:5px;object-fit:cover;"/>`:`<div class="td-thumb-placeholder">📺</div>`}</td>
+      <td style="font-weight:600;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.name||s.title||'—'}</td>
+      <td><span class="cat-tag" style="background:rgba(56,189,248,0.1);color:#38bdf8;">${s.category||'—'}</span></td>
+      <td style="color:var(--muted)">${seasons.length}</td>
+      <td style="color:var(--muted)">${totalEps}</td>
+      <td><span style="color:${statusColor};font-size:.8rem;font-weight:600;">${s.status||'—'}</span></td>
+      <td style="color:var(--muted);font-size:.8rem">${s.createdAt?.toDate?s.createdAt.toDate().toLocaleDateString():'—'}</td>
+      <td style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="btn-toggle" onclick="viewSeriesDetail('${s.id}')" style="background:rgba(56,189,248,0.1);border-color:rgba(56,189,248,0.2);color:#38bdf8;">👁 View</button>
+        <button class="btn-del" onclick="deleteSeries('${s.id}')">🗑</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+window.viewSeriesDetail=function(id){
+  const s=allSeriesData.find(x=>x.id===id);if(!s)return;
+  const panel=document.getElementById('seriesDetailPanel');
+  const inner=document.getElementById('seriesDetailInner');
+  const seasons=s.seasons||[];
+  inner.innerHTML=`
+    <div style="display:flex;align-items:flex-start;gap:20px;margin-bottom:24px;flex-wrap:wrap;">
+      ${s.thumbnailUrl?`<img src="${s.thumbnailUrl}" style="width:80px;aspect-ratio:2/3;object-fit:cover;border-radius:10px;flex-shrink:0;"/>`:''}
+      <div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:1px;">${s.name||s.title}</div>
+        <div style="color:var(--muted);font-size:.85rem;margin-top:4px;">${s.category||''} · ${s.year||''} ${s.rating?'· ★'+s.rating:''}</div>
+        ${s.cast?`<div style="color:var(--muted2);font-size:.82rem;margin-top:6px;">Cast: ${s.cast}</div>`:''}
+        ${s.director?`<div style="color:var(--muted2);font-size:.82rem;">Director: ${s.director}</div>`:''}
+        <div style="color:var(--muted2);font-size:.88rem;margin-top:8px;max-width:500px;line-height:1.6;">${s.description||''}</div>
+      </div>
+    </div>
+    ${seasons.map(season=>`
+      <div style="margin-bottom:20px;">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:#38bdf8;margin-bottom:10px;letter-spacing:1px;">Season ${season.n} · ${season.episodes?.length||0} Episodes</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          ${(season.episodes||[]).map(ep=>`
+            <div style="display:grid;grid-template-columns:40px 1fr auto;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 14px;">
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--muted);text-align:center;">${String(ep.n).padStart(2,'0')}</div>
+              <div>
+                <div style="font-weight:600;font-size:.92rem;">${ep.t||'Episode '+ep.n}</div>
+                <div style="color:var(--muted);font-size:.78rem;">${ep.d||''} ${ep.desc?'· '+ep.desc.slice(0,80)+'...':''}</div>
+              </div>
+              <div style="font-size:.75rem;color:${ep.videoUrl?'var(--success)':'var(--danger)'};">${ep.videoUrl?'✅ Video':'⚠️ No video'}</div>
+            </div>`).join('')}
+        </div>
+      </div>`).join('')}
+    <button onclick="document.getElementById('seriesDetailPanel').style.display='none'" style="background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--muted);border-radius:10px;padding:10px 20px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.88rem;margin-top:8px;">✕ Close</button>`;
+  panel.style.display='block';
+  panel.scrollIntoView({behavior:'smooth'});
+};
+
 function renderAdsTable(){
   const body=document.getElementById('adsTableBody');
-  if(!allAds.length){body.innerHTML=`<tr><td colspan="7" class="empty-table"><div style="font-size:2rem">📺</div><p>No advertisements yet. Upload your first ad!</p></td></tr>`;return;}
+  if(!allAds.length){body.innerHTML=`<tr><td colspan="7" class="empty-table"><div style="font-size:2rem">📺</div><p>No advertisements yet.</p></td></tr>`;return;}
   body.innerHTML=allAds.map(a=>`<tr>
     <td>${a.thumbnailUrl?`<img src="${a.thumbnailUrl}" class="td-thumb" loading="lazy"/>`:`<div class="td-thumb-placeholder">📺</div>`}</td>
     <td style="font-weight:600;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.brand||'—'}</td>
@@ -541,35 +827,28 @@ function renderAdsTable(){
 
 function updateStats(){
   document.getElementById('totalMovies').textContent=allMovies.length;
+  document.getElementById('totalSeries').textContent=allSeriesData.length;
+  const totalEps=allSeriesData.reduce((a,s)=>a+(s.totalEpisodes||0),0);
+  document.getElementById('totalEpisodes').textContent=totalEps;
   document.getElementById('totalAds').textContent=allAds.filter(a=>a.isActive).length;
   document.getElementById('actionCount').textContent=allMovies.filter(v=>v.category==='Action').length;
-  document.getElementById('dramaCount').textContent=allMovies.filter(v=>v.category==='Drama').length;
-  document.getElementById('comedyCount').textContent=allMovies.filter(v=>v.category==='Comedy').length;
 }
 
-window.deleteMovie=async function(id){
-  if(!confirm('Delete this movie? This cannot be undone.'))return;
-  try{await deleteDoc(doc(db,'videos',id));showToast('success','🗑 Movie deleted');loadAll();}
-  catch(e){showToast('error','❌ Delete failed');}
-};
-window.deleteAd=async function(id){
-  if(!confirm('Delete this advertisement? This cannot be undone.'))return;
-  try{await deleteDoc(doc(db,'advertisements',id));showToast('success','🗑 Ad deleted');loadAll();}
-  catch(e){showToast('error','❌ Delete failed');}
-};
-window.toggleAd=async function(id,current){
-  try{await updateDoc(doc(db,'advertisements',id),{isActive:!current});showToast('success',`✅ Ad ${current?'paused':'enabled'}`);loadAll();}
-  catch(e){showToast('error','❌ Update failed');}
-};
+/* ── DELETE ── */
+window.deleteMovie=async function(id){if(!confirm('Delete this movie?'))return;try{await deleteDoc(doc(db,'videos',id));showToast('success','🗑 Movie deleted');loadAll();}catch(e){showToast('error','❌ Delete failed');}};
+window.deleteSeries=async function(id){if(!confirm('Delete this TV series and all its episodes?'))return;try{await deleteDoc(doc(db,'shows',id));showToast('success','🗑 Series deleted');loadAll();}catch(e){showToast('error','❌ Delete failed');}};
+window.deleteAd=async function(id){if(!confirm('Delete this advertisement?'))return;try{await deleteDoc(doc(db,'advertisements',id));showToast('success','🗑 Ad deleted');loadAll();}catch(e){showToast('error','❌ Delete failed');}};
+window.toggleAd=async function(id,current){try{await updateDoc(doc(db,'advertisements',id),{isActive:!current});showToast('success',`✅ Ad ${current?'paused':'enabled'}`);loadAll();}catch(e){showToast('error','❌ Update failed');}};
 
-// DRAG OVER
-['videoDrop','thumbDrop','adVideoDrop','adThumbDrop'].forEach(id=>{
+/* ── DRAG/DROP ── */
+['videoDrop','thumbDrop','adVideoDrop','adThumbDrop','sThumbDrop'].forEach(id=>{
   const el=document.getElementById(id);if(!el)return;
   el.addEventListener('dragover',e=>{e.preventDefault();el.classList.add('drag-over');});
   el.addEventListener('dragleave',()=>el.classList.remove('drag-over'));
   el.addEventListener('drop',e=>{e.preventDefault();el.classList.remove('drag-over');});
 });
 
+/* ── TOAST ── */
 function showToast(type,msg){
   const t=document.getElementById('toast');document.getElementById('toastMsg').textContent=msg;
   t.className='toast '+type+' show';setTimeout(()=>t.classList.remove('show'),4000);
